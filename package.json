@@ -1,0 +1,29 @@
+{
+  "name": "@23degrees/shared-code",
+  "version": "1.0.0",
+  "description": "23degrees shared codebase",
+  "main": "dist/index.js",
+  "repository": "git@bitbucket.org:23degrees-io/23shared-code.git",
+  "author": "Gregor Steiner",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "babel src -d dist",
+    "dev": "nodemon --legacy-watch --watch src --exec yarn run build"
+  },
+  "dependencies": {
+    "chroma-js": "^2.0.3",
+    "d3": "^5.9.1",
+    "moment": "^2.24.0",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.4",
+    "@babel/plugin-proposal-class-properties": "^7.3.4",
+    "@babel/plugin-proposal-decorators": "^7.3.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "nodemon": "^1.18.10"
+  }
+}
