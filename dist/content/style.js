@@ -7,18 +7,26 @@ exports.convertFormatToExtendedFormat = exports.getFormatMarginPaddingObject = e
 
 var _utilities = require("../utilities");
 
+/**
+ * WARNING - DO NOT TOUCH
+ *
+ * ALL THE FUNCTIONS ARE USED MULTIPLE TIMES IN CONTENT VALIDATOR !
+ *
+ * DO NOT TOUCH WITHOUT TALKING TO EVERYBODY
+ *
+ */
 var getFormatObject = function getFormatObject() {
   var size = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 12;
-  var weight = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 400;
+  var weight = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '300';
   var position = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'left';
   var color = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '#000000';
   return {
     enabled: true,
     position: position,
     size: size,
-    weight: weight,
+    weight: String(weight),
     color: color,
-    fontFamily: '"Work Sans", sans-serif',
+    fontFamily: "'Work Sans', sans-serif",
     letterSpacing: 0
   };
 };

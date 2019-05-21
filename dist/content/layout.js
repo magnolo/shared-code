@@ -7,9 +7,16 @@ exports.getLayoutChild = void 0;
 
 var _style = require("./style");
 
-var buttonPadding = (0, _style.getFormatMarginPaddingObject)(5, 'px', 5, 'px', 5, 'px', 5, 'px');
-var buttonMargin = (0, _style.getFormatMarginPaddingObject)(5, 'px', 5, 'px', 5, 'px', 5, 'px');
+var _utilities = require("../utilities");
 
+/**
+ * WARNING - DO NOT TOUCH
+ *
+ * ALL THE FUNCTIONS ARE USED MULTIPLE TIMES IN CONTENT VALIDATOR !
+ *
+ * DO NOT TOUCH WITHOUT TALKING TO EVERYBODY
+ *
+ */
 var getLayoutChild = function getLayoutChild(id, label, type) {
   var userEditable = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
   var direction = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 'column';
@@ -35,6 +42,10 @@ var getLayoutChild = function getLayoutChild(id, label, type) {
         // normal | left | flex-start | right | flex-end | space-between | space-around | space-evenly
         alignItems: 'normal' // normal | flex-start | flex-end | center
 
+      },
+      options: {
+        margin: (0, _style.getFormatMarginPaddingObject)(0, 'px', 0, 'px', 0, 'px', 0, 'px'),
+        padding: (0, _style.getFormatMarginPaddingObject)(0, 'px', 0, 'px', 0, 'px', 0, 'px')
       }
     });
     obj = Object.assign(obj, {
@@ -59,6 +70,9 @@ var getLayoutChild = function getLayoutChild(id, label, type) {
   }
 
   if (id === 'button') {
+    // cloneObject those or we have funny linked stuff going on..
+    var buttonMargin = (0, _style.getFormatMarginPaddingObject)(5, 'px', 5, 'px', 5, 'px', 5, 'px');
+    var buttonPadding = (0, _style.getFormatMarginPaddingObject)(2, 'px', 5, 'px', 2, 'px', 5, 'px');
     obj = Object.assign(obj, {
       options: {
         action: 'menu',
@@ -66,17 +80,18 @@ var getLayoutChild = function getLayoutChild(id, label, type) {
         iconPosition: 'left',
         borderRadius: 100,
         text: '',
-        font: (0, _style.getExtendedFormatObject)(12, undefined, undefined, '#000', undefined, undefined, buttonPadding, buttonMargin),
+        font: (0, _style.getExtendedFormatObject)(12, undefined, undefined, '#000000', undefined, undefined, (0, _utilities.cloneObject)(buttonPadding), (0, _utilities.cloneObject)(buttonMargin)),
+        textMargin: (0, _style.getFormatMarginPaddingObject)(undefined, undefined, undefined, undefined, undefined, undefined, 5, 'px'),
         background: {
           backgroundColor: 'rgba(0, 0, 0, 0)'
         },
-        boxShadow: (0, _style.getFormatShadowObject)(0, 0, 0, 0, 'rgba(0,0,0,0.4)'),
+        boxShadow: (0, _style.getFormatShadowObject)(0, 0, 0, 0, 'rgba(0, 0, 0, 0)'),
         hoverText: '',
-        hoverFont: (0, _style.getExtendedFormatObject)(12, undefined, undefined, '#fff', undefined, undefined, buttonPadding, buttonMargin),
+        hoverFont: (0, _style.getExtendedFormatObject)(12, undefined, undefined, '#ffffff', undefined, undefined, (0, _utilities.cloneObject)(buttonPadding), (0, _utilities.cloneObject)(buttonMargin)),
         hoverBackground: {
           backgroundColor: 'rgba(0, 0, 0, 0.2)'
         },
-        hoverBoxShadow: (0, _style.getFormatShadowObject)(0, 2, 4, 0, 'rgba(0,0,0,0.4)')
+        hoverBoxShadow: (0, _style.getFormatShadowObject)(0, 0, 3, 0, 'rgba(0, 0, 0, 0.4)')
       }
     });
   }
@@ -85,31 +100,55 @@ var getLayoutChild = function getLayoutChild(id, label, type) {
     obj = Object.assign(obj, {
       options: {
         startOpen: false,
-        showTitle: true,
-        showSubTitle: true,
         type: 'full',
         // full, drawer, swiper
         position: 'left',
         // drawer: left right, swiper: top bottom
-        size: {
-          // swiper: height, drawer: width
-          value: 200,
-          unit: 'px'
-        },
         overlayType: 'push',
-        // swiper: overlay | push, maybe also for drawer 
+        // swiper: overlay | push, maybe also for drawer
         children: {
           showIcons: false,
-          showImages: true
+          showImages: true,
+          alignment: 'center'
         },
         style: {
+          title: (0, _style.getExtendedFormatObject)(),
+          subTitle: (0, _style.getExtendedFormatObject)(),
           background: {
-            backgroundColor: 'rgba(255,255,255, 0.8)'
+            backgroundColor: 'rgba(255, 255, 255, 1)'
           },
           margin: (0, _style.getFormatMarginPaddingObject)(),
           pagination: (0, _style.getExtendedFormatObject)(),
           padding: (0, _style.getFormatMarginPaddingObject)(),
-          children: (0, _style.getExtendedFormatObject)()
+          children: (0, _style.getExtendedFormatObject)(undefined, undefined, undefined, undefined, undefined, undefined, (0, _style.getFormatMarginPaddingObject)(10, 'px', 10, 'px', 10, 'px', 10, 'px')),
+          boxShadow: (0, _style.getFormatShadowObject)(0, 2, 25, 0, 'rgba(0, 0, 0, 0.2)'),
+          images: {
+            width: {
+              desktop: {
+                value: 20,
+                unit: '%'
+              },
+              mobile: {
+                value: 33,
+                unit: '%'
+              }
+            },
+            padding: (0, _style.getFormatMarginPaddingObject)(),
+            margin: (0, _style.getFormatMarginPaddingObject)(undefined, undefined, 15, 'px', undefined, undefined, 5, 'px'),
+            boxShadow: (0, _style.getFormatShadowObject)(0, 4, 7, 0, 'rgba(0,0,0,0.2)')
+          },
+          drawer: {
+            size: {
+              value: 30,
+              unit: '%'
+            }
+          },
+          swiper: {
+            size: {
+              value: 200,
+              unit: 'px'
+            }
+          }
         }
       }
     });

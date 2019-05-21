@@ -12,7 +12,7 @@ var _layout = require("./content/layout");
 var _style = require("./content/style");
 
 var magicExport = function magicExport() {
-  console.log('magic export is crazy');
+  console.log('magic export is crazy development');
 }; // Webpack somehow requires proper objects ..
 
 
