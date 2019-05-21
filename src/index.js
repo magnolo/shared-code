@@ -10,7 +10,7 @@ import {
 } from './content/style';
 
 const magicExport = () => {
-  console.log('magic export is crazy');
+  console.log('magic export is crazy development');
 };
 
 // Webpack somehow requires proper objects ..

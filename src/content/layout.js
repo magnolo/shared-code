@@ -1,8 +1,13 @@
 import { getExtendedFormatObject, getFormatMarginPaddingObject, getFormatShadowObject } from './style';
-
-const buttonPadding = getFormatMarginPaddingObject(5, 'px', 5, 'px', 5, 'px', 5, 'px');
-const buttonMargin = getFormatMarginPaddingObject(5, 'px', 5, 'px', 5, 'px', 5, 'px');
-
+import { cloneObject } from '../utilities';
+/**
+ * WARNING - DO NOT TOUCH
+ *
+ * ALL THE FUNCTIONS ARE USED MULTIPLE TIMES IN CONTENT VALIDATOR !
+ *
+ * DO NOT TOUCH WITHOUT TALKING TO EVERYBODY
+ *
+ */
 const getLayoutChild = (id, label, type, userEditable = false, direction = 'column') => {
   let obj = {
     id: id, // menu | button | ...
@@ -20,6 +25,10 @@ const getLayoutChild = (id, label, type, userEditable = false, direction = 'colu
         flexGrow: 0, // 0 | 1 | 2 | 3
         justifyContent: 'space-between', // normal | left | flex-start | right | flex-end | space-between | space-around | space-evenly
         alignItems: 'normal' // normal | flex-start | flex-end | center
+      },
+      options: {
+        margin: getFormatMarginPaddingObject(0, 'px', 0, 'px', 0, 'px', 0, 'px'),
+        padding: getFormatMarginPaddingObject(0, 'px', 0, 'px', 0, 'px', 0, 'px')
       }
     });
 
@@ -43,6 +52,10 @@ const getLayoutChild = (id, label, type, userEditable = false, direction = 'colu
   }
 
   if (id === 'button') {
+    // cloneObject those or we have funny linked stuff going on..
+    const buttonMargin = getFormatMarginPaddingObject(5, 'px', 5, 'px', 5, 'px', 5, 'px');
+    const buttonPadding = getFormatMarginPaddingObject(2, 'px', 5, 'px', 2, 'px', 5, 'px');
+
     obj = Object.assign(obj, {
       options: {
         action: 'menu',
@@ -50,13 +63,14 @@ const getLayoutChild = (id, label, type, userEditable = false, direction = 'colu
         iconPosition: 'left',
         borderRadius: 100,
         text: '',
-        font: getExtendedFormatObject(12, undefined, undefined, '#000', undefined, undefined, buttonPadding, buttonMargin),
+        font: getExtendedFormatObject(12, undefined, undefined, '#000000', undefined, undefined, cloneObject(buttonPadding), cloneObject(buttonMargin)),
+        textMargin:  getFormatMarginPaddingObject(undefined,undefined,undefined,undefined,undefined,undefined,5,'px'),
         background: { backgroundColor: 'rgba(0, 0, 0, 0)' },
-        boxShadow: getFormatShadowObject(0, 0, 0, 0, 'rgba(0,0,0,0.4)'),
+        boxShadow: getFormatShadowObject(0, 0, 0, 0, 'rgba(0, 0, 0, 0)'),
         hoverText: '',
-        hoverFont: getExtendedFormatObject(12, undefined, undefined, '#fff', undefined, undefined, buttonPadding, buttonMargin),
+        hoverFont: getExtendedFormatObject(12, undefined, undefined, '#ffffff', undefined, undefined, cloneObject(buttonPadding), cloneObject(buttonMargin)),
         hoverBackground: { backgroundColor: 'rgba(0, 0, 0, 0.2)' },
-        hoverBoxShadow: getFormatShadowObject(0, 2, 4, 0, 'rgba(0,0,0,0.4)')
+        hoverBoxShadow: getFormatShadowObject(0, 0, 3, 0, 'rgba(0, 0, 0, 0.4)')
       }
     });
   }
@@ -65,25 +79,50 @@ const getLayoutChild = (id, label, type, userEditable = false, direction = 'colu
     obj = Object.assign(obj, {
       options: {
         startOpen: false,
-        showTitle: true,
-        showSubTitle: true,
         type: 'full', // full, drawer, swiper
         position: 'left', // drawer: left right, swiper: top bottom
-        size: { // swiper: height, drawer: width
-          value: 200,
-          unit: 'px'
-        },
-        overlayType: 'push', // swiper: overlay | push, maybe also for drawer 
+        overlayType: 'push', // swiper: overlay | push, maybe also for drawer
         children: {
           showIcons: false,
-          showImages: true
+          showImages: true,
+          alignment: 'center'
         },
         style: {
-          background: { backgroundColor: 'rgba(255,255,255, 0.8)' },
+          title: getExtendedFormatObject(),
+          subTitle: getExtendedFormatObject(),
+          background: { backgroundColor: 'rgba(255, 255, 255, 1)' },
           margin: getFormatMarginPaddingObject(),
           pagination: getExtendedFormatObject(),
           padding: getFormatMarginPaddingObject(),
-          children: getExtendedFormatObject()
+          children: getExtendedFormatObject(undefined, undefined, undefined, undefined, undefined, undefined,  getFormatMarginPaddingObject(10, 'px', 10, 'px',10, 'px', 10, 'px')),
+          boxShadow: getFormatShadowObject(0, 2, 25, 0, 'rgba(0, 0, 0, 0.2)'),
+          images: {
+            width: {
+              desktop: {
+                value: 20,
+                unit: '%'
+              },
+              mobile: {
+                value: 33,
+                unit: '%'
+              }
+            },
+            padding: getFormatMarginPaddingObject(),
+            margin: getFormatMarginPaddingObject(undefined, undefined, 15, 'px', undefined, undefined, 5, 'px'),
+            boxShadow: getFormatShadowObject(0, 4, 7, 0, 'rgba(0,0,0,0.2)'),
+          },
+          drawer: {
+            size: {
+              value: 30,
+              unit: '%'
+            }
+          },
+          swiper:{
+            size: {
+              value: 200,
+              unit: 'px'
+            }
+          }
         }
       }
     });

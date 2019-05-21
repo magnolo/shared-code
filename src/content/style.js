@@ -1,13 +1,20 @@
 import { cloneObject } from '../utilities';
-
-const getFormatObject = (size = 12, weight = 400, position = 'left', color = '#000000') => {
+/**
+ * WARNING - DO NOT TOUCH
+ *
+ * ALL THE FUNCTIONS ARE USED MULTIPLE TIMES IN CONTENT VALIDATOR !
+ *
+ * DO NOT TOUCH WITHOUT TALKING TO EVERYBODY
+ *
+ */
+const getFormatObject = (size = 12, weight = '300', position = 'left', color = '#000000') => {
   return {
     enabled: true,
     position: position,
     size: size,
-    weight: weight,
+    weight: String(weight),
     color: color,
-    fontFamily: '"Work Sans", sans-serif',
+    fontFamily: "'Work Sans', sans-serif",
     letterSpacing: 0
   };
 };
