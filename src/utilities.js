@@ -15,4 +15,6 @@ const groupBy = (xs, key) => {
   }, {});
 };
 
-export { isObject, cloneObject, unique, sleep, sleepWith, groupBy };
+const roundTo = (num, digits = 2) => Math.round(num * Math.pow(10, digits)) / Math.pow(10, digits);
+
+export { isObject, cloneObject, unique, sleep, sleepWith, groupBy, roundTo };

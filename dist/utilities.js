@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.groupBy = exports.sleepWith = exports.sleep = exports.unique = exports.cloneObject = exports.isObject = void 0;
+exports.roundTo = exports.groupBy = exports.sleepWith = exports.sleep = exports.unique = exports.cloneObject = exports.isObject = void 0;
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
@@ -59,3 +59,10 @@ var groupBy = function groupBy(xs, key) {
 };
 
 exports.groupBy = groupBy;
+
+var roundTo = function roundTo(num) {
+  var digits = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
+  return Math.round(num * Math.pow(10, digits)) / Math.pow(10, digits);
+};
+
+exports.roundTo = roundTo;

@@ -1,5 +1,5 @@
-import { isObject, cloneObject, unique, sleep, sleepWith, groupBy } from './utilities';
-import { getLayoutChild } from './content/layout';
+import { isObject, cloneObject, unique, sleep, sleepWith, groupBy, roundTo } from './utilities';
+import { createLayoutObject, getLayoutChildObjects, createAtlasLayout, createVisualLayout, validateLayout } from './content/layout';
 import {
   getFormatObject,
   getExtendedFormatObject,
@@ -14,8 +14,8 @@ const magicExport = () => {
 };
 
 // Webpack somehow requires proper objects ..
-const utilities = { isObject, cloneObject, unique, sleep, sleepWith, groupBy };
-const layout = { getLayoutChild };
+const utilities = { isObject, cloneObject, unique, sleep, sleepWith, groupBy, roundTo };
+const layout = { createLayoutObject, getLayoutChildObjects, createAtlasLayout, createVisualLayout, validateLayout };
 const style = {
   getFormatObject,
   getExtendedFormatObject,

@@ -23,11 +23,16 @@ var utilities = {
   unique: _utilities.unique,
   sleep: _utilities.sleep,
   sleepWith: _utilities.sleepWith,
-  groupBy: _utilities.groupBy
+  groupBy: _utilities.groupBy,
+  roundTo: _utilities.roundTo
 };
 exports.utilities = utilities;
 var layout = {
-  getLayoutChild: _layout.getLayoutChild
+  createLayoutObject: _layout.createLayoutObject,
+  getLayoutChildObjects: _layout.getLayoutChildObjects,
+  createAtlasLayout: _layout.createAtlasLayout,
+  createVisualLayout: _layout.createVisualLayout,
+  validateLayout: _layout.validateLayout
 };
 exports.layout = layout;
 var style = {
