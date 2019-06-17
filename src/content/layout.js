@@ -10,6 +10,8 @@ import { cloneObject } from '../utilities';
  *
  * DO NOT TOUCH WITHOUT TALKING TO EVERYBODY
  *
+ * WHEN CHANGING GENERATED VERSION PATCH TAGESSCHAU HACKS IN CONTENT VALIDATOR!
+ *
  */
 
 const getLayoutChildObjects = layout => layout.children.reduce((acc, obj) => acc.concat(obj, getLayoutChildObjects(obj)), []);
@@ -20,8 +22,6 @@ const validateLayout = obj => {
     layout.version = layout.version !== undefined ? layout.version : 1;
 
     if (layout.version === 1) {
-      layout.version = 2;
-
       const childObjects = getLayoutChildObjects(layout);
       for (const child of childObjects) {
         if (['root', 'container'].includes(child.type)) {
@@ -60,7 +60,26 @@ const validateLayout = obj => {
           child.style = style;
         }
       }
+
+      layout.version = 2;
     }
+
+    // @hedata: ADDED BACKGROUND OPTIONS FOR CONTAINER ROW
+    if (layout.version === 2) {
+      const childObjects = getLayoutChildObjects(layout);
+      for (const child of childObjects) {
+        if (['container'].includes(child.type)) {
+          // @hedata: ADDED BACKGROUND OPTIONS FOR CONTAINER ROW
+          if (child.style.background === undefined) child.style.background = { backgroundColor: 'rgba(0, 0, 0, 0)' };
+        }
+        if (['container', 'root'].includes(child.type)) {
+          if (child.style.position !== 'absolute' && child.style.zIndex === 1) child.style.zIndex = 'auto'
+        }
+      }
+
+      //layout.version = 3;
+    }
+    // END
   }
 
   return obj;
@@ -74,8 +93,7 @@ const createLayoutObject = (type, label, style = {}) => {
     children: [],
     options: {},
     style: {
-      flexGrow: 0, // 0 | 1
-      width: 'initial'
+      flexGrow: 0 // 0 | 1
     }
   };
 
@@ -85,8 +103,10 @@ const createLayoutObject = (type, label, style = {}) => {
       justifyContent: 'space-between', // normal | left | flex-start | right | flex-end | space-between | space-around | space-evenly
       alignItems: 'normal', // normal | flex-start | flex-end | center
       position: 'initial', // initial | relative | absolute
-      zIndex: 0
+      zIndex: 'auto',
+      background: { backgroundColor: 'rgba(0, 0, 0, 0)' } // @hedata: ADDED BACKGROUND OPTIONS FOR CONTAINER ROW
     });
+
     obj.options = Object.assign(obj.options, {
       margin: getFormatMarginPaddingObject(),
       padding: getFormatMarginPaddingObject()
@@ -119,8 +139,26 @@ const createLayoutObject = (type, label, style = {}) => {
     obj.options = Object.assign(obj.options, {
       width: 32,
       height: 32,
-      borderRadius: 100,
+      borderRadius: 0,
       margin: getFormatMarginPaddingObject(),
+      padding: getFormatMarginPaddingObject(),
+      boxShadow: getFormatShadowObject(0, 0, 0, 0, 'rgba(0, 0, 0, 0)')
+    });
+  }
+
+  if (type === 'map-legend') {
+    obj.options = Object.assign(obj.options, {
+      borderRadius: 100,
+      margin: getFormatMarginPaddingObject(10, 'px', 10, 'px', 10, 'px', 10, 'px'),
+      padding: getFormatMarginPaddingObject(),
+      boxShadow: getFormatShadowObject(0, 0, 0, 0, 'rgba(0, 0, 0, 0)')
+    });
+  }
+
+  if (type === 'search') {
+    obj.options = Object.assign(obj.options, {
+      borderRadius: 100,
+      margin: getFormatMarginPaddingObject(10, 'px', 10, 'px', 10, 'px', 10, 'px'),
       padding: getFormatMarginPaddingObject(),
       boxShadow: getFormatShadowObject(0, 0, 0, 0, 'rgba(0, 0, 0, 0)')
     });
@@ -194,14 +232,20 @@ const createAtlasLayout = content => {
   const { type, typeSpecific } = content;
 
   // root container
-  const containerHeader = createLayoutObject('container', 'Header', { flexDirection: 'column', zIndex: 1 });
-  const containerContent = createLayoutObject('container', 'Content', { flexDirection: 'column', flexGrow: 1, position: 'relative' });
-  const containerFooter = createLayoutObject('container', 'Footer', { flexDirection: 'column', zIndex: 1 });
+  const containerStyle = { flexDirection: 'column', alignItems: 'normal', zIndex: 'auto' };
+  const containerHeader = createLayoutObject('container', 'Header', { ...containerStyle });
+  const containerContent = createLayoutObject('container', 'Content', { ...containerStyle, flexGrow: 1, position: 'relative' });
+  const containerFooter = createLayoutObject('container', 'Footer', { ...containerStyle });
 
   // rows
   const rowHeader1 = createLayoutObject('container', 'Row', { alignItems: 'center' });
   const rowHeader2 = createLayoutObject('container', 'Row', { alignItems: 'center' });
   const rowHeader3 = createLayoutObject('container', 'Row');
+
+  const rowContentContainer = createLayoutObject('container', 'Row', { position: 'absolute', width: '100%', height: '100%', flexDirection: 'column' });
+
+  const rowContent1 = createLayoutObject('container', 'Row');
+
   const rowFooter1 = createLayoutObject('container', 'Row', { alignItems: 'center' });
   const rowFooter2 = createLayoutObject('container', 'Row');
 
@@ -251,8 +295,10 @@ const createAtlasLayout = content => {
   rowHeader2.children.push(elementSubtitle);
   rowFooter1.children.push(elementMenu);
 
+  rowContentContainer.children.push(rowContent1);
+
   containerHeader.children.push(rowHeader1, rowHeader2, rowHeader3);
-  containerContent.children.push(elementContentSelector);
+  containerContent.children.push(elementContentSelector, rowContentContainer);
   containerFooter.children.push(rowFooter1, rowFooter2);
 
   const layout = {
@@ -274,9 +320,10 @@ const createVisualLayout = content => {
   const { type, typeSpecific } = content;
 
   // root container
-  const containerHeader = createLayoutObject('container', 'Header', { flexDirection: 'column', zIndex: 1 });
-  const containerContent = createLayoutObject('container', 'Content', { flexDirection: 'column', flexGrow: 1, position: 'relative' });
-  const containerFooter = createLayoutObject('container', 'Footer', { flexDirection: 'column', zIndex: 1 });
+  const containerStyle = { flexDirection: 'column', alignItems: 'normal', zIndex: 'auto' };
+  const containerHeader = createLayoutObject('container', 'Header', { ...containerStyle });
+  const containerContent = createLayoutObject('container', 'Content', { ...containerStyle, flexGrow: 1, position: 'relative' });
+  const containerFooter = createLayoutObject('container', 'Footer', { ...containerStyle });
 
   // rows
   const rowHeader1 = createLayoutObject('container', 'Row');
@@ -284,14 +331,23 @@ const createVisualLayout = content => {
   const rowHeader3 = createLayoutObject('container', 'Row');
   const rowHeader4 = createLayoutObject('container', 'Row');
   const rowHeader5 = createLayoutObject('container', 'Row');
-  const rowFooter1 = createLayoutObject('container', 'Row', { alignItems: 'center' });
-  const rowFooter2 = createLayoutObject('container', 'Row');
+
+  const rowContentContainer = createLayoutObject('container', 'Row', { position: 'absolute', width: '100%', height: '100%', flexDirection: 'column', zIndex: 0 });
+
+  const rowContent1 = createLayoutObject('container', 'Row');
+  const rowContent2 = createLayoutObject('container', 'Row');
+  const rowContent3 = createLayoutObject('container', 'Row');
+
+  const rowFooter1 = createLayoutObject('container', 'Row', { bottom: 0, alignItems: 'center' });
+  const rowFooter2 = createLayoutObject('container', 'Row', { bottom: 0 });
 
   // elements
   const elementTitle = createLayoutObject('title', 'Title', { flexGrow: 1 });
   const elementSubtitle = createLayoutObject('subTitle', 'Subtitle', { flexGrow: 1 });
   const elementFilter = createLayoutObject('filter', 'Filter', { flexGrow: 1 });
-  const elementLegend = createLayoutObject('legend', 'Legend', { flexGrow: 1 });
+  const elementLegend = createLayoutObject('legend', 'Chart Legend', { flexGrow: 1 });
+  const elementMapLegend = createLayoutObject('map-legend', 'Map Legend');
+  const elementMapSearch = createLayoutObject('search', 'Map Search');
   const elementLogo = createLayoutObject('logo', 'Logo');
   const elementSource = createLayoutObject('source', 'Source');
   const elementButtonInfo = createLayoutObject('button', 'Button');
@@ -306,10 +362,22 @@ const createVisualLayout = content => {
   rowHeader2.children.push(elementSubtitle);
   rowHeader3.children.push(elementFilter);
   rowHeader4.children.push(elementLegend);
+
+  //row Cotent 1 -> subRow
+  const subRowContent = createLayoutObject('container', 'Subrow', { flexDirection: 'column' });
+  subRowContent.children.push(elementMapSearch);
+  subRowContent.children.push(elementMapLegend);
+  rowContent1.children.push(subRowContent);
+  //map Specific parts
+  //rowContent1.children.push(elementMapSearch);
+  //rowContent3.children.push(elementMapLegend);
+
   rowFooter1.children.push(elementLogo, elementSource, elementButtonInfo);
 
+  rowContentContainer.children.push(rowContent1, rowContent2, rowContent3);
+
   containerHeader.children.push(rowHeader1, rowHeader2, rowHeader3, rowHeader4, rowHeader5);
-  containerContent.children.push(elementVisual, elementVisualOverlay);
+  containerContent.children.push(elementVisual, rowContentContainer, elementVisualOverlay);
   containerFooter.children.push(rowFooter1, rowFooter2);
 
   const layout = {

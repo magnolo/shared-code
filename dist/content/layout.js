@@ -13,12 +13,18 @@ var _utilities = require("../utilities");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 /**
  * WARNING - DO NOT TOUCH
  *
  * ALL THE FUNCTIONS ARE USED MULTIPLE TIMES IN CONTENT VALIDATOR !
  *
  * DO NOT TOUCH WITHOUT TALKING TO EVERYBODY
+ *
+ * WHEN CHANGING GENERATED VERSION PATCH TAGESSCHAU HACKS IN CONTENT VALIDATOR!
  *
  */
 var getLayoutChildObjects = function getLayoutChildObjects(layout) {
@@ -36,7 +42,6 @@ var validateLayout = function validateLayout(obj) {
     layout.version = layout.version !== undefined ? layout.version : 1;
 
     if (layout.version === 1) {
-      layout.version = 2;
       var childObjects = getLayoutChildObjects(layout);
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
@@ -92,7 +97,50 @@ var validateLayout = function validateLayout(obj) {
           }
         }
       }
-    }
+
+      layout.version = 2;
+    } // @hedata: ADDED BACKGROUND OPTIONS FOR CONTAINER ROW
+
+
+    if (layout.version === 2) {
+      var _childObjects = getLayoutChildObjects(layout);
+
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = _childObjects[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var _child = _step2.value;
+
+          if (['container'].includes(_child.type)) {
+            // @hedata: ADDED BACKGROUND OPTIONS FOR CONTAINER ROW
+            if (_child.style.background === undefined) _child.style.background = {
+              backgroundColor: 'rgba(0, 0, 0, 0)'
+            };
+          }
+
+          if (['container', 'root'].includes(_child.type)) {
+            if (_child.style.position !== 'absolute' && _child.style.zIndex === 1) _child.style.zIndex = 'auto';
+          }
+        } //layout.version = 3;
+
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+            _iterator2["return"]();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+    } // END
+
   }
 
   return obj;
@@ -111,9 +159,8 @@ var createLayoutObject = function createLayoutObject(type, label) {
     children: [],
     options: {},
     style: {
-      flexGrow: 0,
-      // 0 | 1
-      width: 'initial'
+      flexGrow: 0 // 0 | 1
+
     }
   };
 
@@ -127,7 +174,11 @@ var createLayoutObject = function createLayoutObject(type, label) {
       // normal | flex-start | flex-end | center
       position: 'initial',
       // initial | relative | absolute
-      zIndex: 0
+      zIndex: 'auto',
+      background: {
+        backgroundColor: 'rgba(0, 0, 0, 0)' // @hedata: ADDED BACKGROUND OPTIONS FOR CONTAINER ROW
+
+      }
     });
     obj.options = Object.assign(obj.options, {
       margin: (0, _style2.getFormatMarginPaddingObject)(),
@@ -164,8 +215,26 @@ var createLayoutObject = function createLayoutObject(type, label) {
     obj.options = Object.assign(obj.options, {
       width: 32,
       height: 32,
-      borderRadius: 100,
+      borderRadius: 0,
       margin: (0, _style2.getFormatMarginPaddingObject)(),
+      padding: (0, _style2.getFormatMarginPaddingObject)(),
+      boxShadow: (0, _style2.getFormatShadowObject)(0, 0, 0, 0, 'rgba(0, 0, 0, 0)')
+    });
+  }
+
+  if (type === 'map-legend') {
+    obj.options = Object.assign(obj.options, {
+      borderRadius: 100,
+      margin: (0, _style2.getFormatMarginPaddingObject)(10, 'px', 10, 'px', 10, 'px', 10, 'px'),
+      padding: (0, _style2.getFormatMarginPaddingObject)(),
+      boxShadow: (0, _style2.getFormatShadowObject)(0, 0, 0, 0, 'rgba(0, 0, 0, 0)')
+    });
+  }
+
+  if (type === 'search') {
+    obj.options = Object.assign(obj.options, {
+      borderRadius: 100,
+      margin: (0, _style2.getFormatMarginPaddingObject)(10, 'px', 10, 'px', 10, 'px', 10, 'px'),
       padding: (0, _style2.getFormatMarginPaddingObject)(),
       boxShadow: (0, _style2.getFormatShadowObject)(0, 0, 0, 0, 'rgba(0, 0, 0, 0)')
     });
@@ -237,19 +306,17 @@ var createAtlasLayout = function createAtlasLayout(content) {
   var type = content.type,
       typeSpecific = content.typeSpecific; // root container
 
-  var containerHeader = createLayoutObject('container', 'Header', {
+  var containerStyle = {
     flexDirection: 'column',
-    zIndex: 1
-  });
-  var containerContent = createLayoutObject('container', 'Content', {
-    flexDirection: 'column',
+    alignItems: 'normal',
+    zIndex: 'auto'
+  };
+  var containerHeader = createLayoutObject('container', 'Header', _objectSpread({}, containerStyle));
+  var containerContent = createLayoutObject('container', 'Content', _objectSpread({}, containerStyle, {
     flexGrow: 1,
     position: 'relative'
-  });
-  var containerFooter = createLayoutObject('container', 'Footer', {
-    flexDirection: 'column',
-    zIndex: 1
-  }); // rows
+  }));
+  var containerFooter = createLayoutObject('container', 'Footer', _objectSpread({}, containerStyle)); // rows
 
   var rowHeader1 = createLayoutObject('container', 'Row', {
     alignItems: 'center'
@@ -258,6 +325,13 @@ var createAtlasLayout = function createAtlasLayout(content) {
     alignItems: 'center'
   });
   var rowHeader3 = createLayoutObject('container', 'Row');
+  var rowContentContainer = createLayoutObject('container', 'Row', {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    flexDirection: 'column'
+  });
+  var rowContent1 = createLayoutObject('container', 'Row');
   var rowFooter1 = createLayoutObject('container', 'Row', {
     alignItems: 'center'
   });
@@ -310,8 +384,9 @@ var createAtlasLayout = function createAtlasLayout(content) {
 
   rowHeader2.children.push(elementSubtitle);
   rowFooter1.children.push(elementMenu);
+  rowContentContainer.children.push(rowContent1);
   containerHeader.children.push(rowHeader1, rowHeader2, rowHeader3);
-  containerContent.children.push(elementContentSelector);
+  containerContent.children.push(elementContentSelector, rowContentContainer);
   containerFooter.children.push(rowFooter1, rowFooter2);
   var layout = {
     active: 'default',
@@ -333,29 +408,40 @@ var createVisualLayout = function createVisualLayout(content) {
   var type = content.type,
       typeSpecific = content.typeSpecific; // root container
 
-  var containerHeader = createLayoutObject('container', 'Header', {
+  var containerStyle = {
     flexDirection: 'column',
-    zIndex: 1
-  });
-  var containerContent = createLayoutObject('container', 'Content', {
-    flexDirection: 'column',
+    alignItems: 'normal',
+    zIndex: 'auto'
+  };
+  var containerHeader = createLayoutObject('container', 'Header', _objectSpread({}, containerStyle));
+  var containerContent = createLayoutObject('container', 'Content', _objectSpread({}, containerStyle, {
     flexGrow: 1,
     position: 'relative'
-  });
-  var containerFooter = createLayoutObject('container', 'Footer', {
-    flexDirection: 'column',
-    zIndex: 1
-  }); // rows
+  }));
+  var containerFooter = createLayoutObject('container', 'Footer', _objectSpread({}, containerStyle)); // rows
 
   var rowHeader1 = createLayoutObject('container', 'Row');
   var rowHeader2 = createLayoutObject('container', 'Row');
   var rowHeader3 = createLayoutObject('container', 'Row');
   var rowHeader4 = createLayoutObject('container', 'Row');
   var rowHeader5 = createLayoutObject('container', 'Row');
+  var rowContentContainer = createLayoutObject('container', 'Row', {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    flexDirection: 'column',
+    zIndex: 0
+  });
+  var rowContent1 = createLayoutObject('container', 'Row');
+  var rowContent2 = createLayoutObject('container', 'Row');
+  var rowContent3 = createLayoutObject('container', 'Row');
   var rowFooter1 = createLayoutObject('container', 'Row', {
+    bottom: 0,
     alignItems: 'center'
   });
-  var rowFooter2 = createLayoutObject('container', 'Row'); // elements
+  var rowFooter2 = createLayoutObject('container', 'Row', {
+    bottom: 0
+  }); // elements
 
   var elementTitle = createLayoutObject('title', 'Title', {
     flexGrow: 1
@@ -366,9 +452,11 @@ var createVisualLayout = function createVisualLayout(content) {
   var elementFilter = createLayoutObject('filter', 'Filter', {
     flexGrow: 1
   });
-  var elementLegend = createLayoutObject('legend', 'Legend', {
+  var elementLegend = createLayoutObject('legend', 'Chart Legend', {
     flexGrow: 1
   });
+  var elementMapLegend = createLayoutObject('map-legend', 'Map Legend');
+  var elementMapSearch = createLayoutObject('search', 'Map Search');
   var elementLogo = createLayoutObject('logo', 'Logo');
   var elementSource = createLayoutObject('source', 'Source');
   var elementButtonInfo = createLayoutObject('button', 'Button');
@@ -384,10 +472,21 @@ var createVisualLayout = function createVisualLayout(content) {
   rowHeader1.children.push(elementTitle);
   rowHeader2.children.push(elementSubtitle);
   rowHeader3.children.push(elementFilter);
-  rowHeader4.children.push(elementLegend);
+  rowHeader4.children.push(elementLegend); //row Cotent 1 -> subRow
+
+  var subRowContent = createLayoutObject('container', 'Subrow', {
+    flexDirection: 'column'
+  });
+  subRowContent.children.push(elementMapSearch);
+  subRowContent.children.push(elementMapLegend);
+  rowContent1.children.push(subRowContent); //map Specific parts
+  //rowContent1.children.push(elementMapSearch);
+  //rowContent3.children.push(elementMapLegend);
+
   rowFooter1.children.push(elementLogo, elementSource, elementButtonInfo);
+  rowContentContainer.children.push(rowContent1, rowContent2, rowContent3);
   containerHeader.children.push(rowHeader1, rowHeader2, rowHeader3, rowHeader4, rowHeader5);
-  containerContent.children.push(elementVisual, elementVisualOverlay);
+  containerContent.children.push(elementVisual, rowContentContainer, elementVisualOverlay);
   containerFooter.children.push(rowFooter1, rowFooter2);
   var layout = {
     active: 'default',
