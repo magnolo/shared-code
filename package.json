@@ -1,5 +1,5 @@
 {
-  "name": "@23shared-code",
+  "name": "@23degrees/shared-code",
   "version": "1.0.0",
   "description": "23degrees shared codebase",
   "main": "dist/index.js",
