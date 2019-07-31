@@ -1,5 +1,5 @@
 {
-  "name": "@23degrees/shared-code",
+  "name": "23shared-code",
   "version": "1.0.0",
   "description": "23degrees shared codebase",
   "main": "dist/index.js",
@@ -8,22 +8,31 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "babel src -d dist",
-    "dev": "nodemon --legacy-watch --watch src --exec yarn run build"
+    "babel": "babel src -d dist",
+    "build": "webpack --config webpack.config.js",
+    "dev": "nodemon --delay 500ms --legacy-watch --watch src --exec yarn run build",
+    "webpack-watch": "webpack --config webpack.config.js --watch --poll 500"
   },
   "dependencies": {
-    "chroma-js": "^2.0.3",
-    "d3": "^5.9.1",
+    "chroma-js": "^2.0.4",
+    "cross-fetch": "^3.0.4",
+    "d3": "^5.9.7",
+    "d3-scale": "^3.0.0",
     "moment": "^2.24.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.3.4",
-    "@babel/plugin-proposal-class-properties": "^7.3.4",
-    "@babel/plugin-proposal-decorators": "^7.3.0",
-    "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
-    "@babel/preset-env": "^7.3.4",
-    "nodemon": "^1.18.10"
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-proposal-decorators": "^7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "babel-loader": "^8.0.6",
+    "nodemon": "^1.19.1",
+    "webpack": "^4.38.0",
+    "webpack-bundle-analyzer": "^3.3.2",
+    "webpack-cli": "^3.3.6",
+    "webpack-visualizer-plugin": "^0.1.11"
   }
 }

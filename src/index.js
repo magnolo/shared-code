@@ -1,28 +1,46 @@
-import { isObject, cloneObject, unique, sleep, sleepWith, groupBy, roundTo } from './utilities';
-import { createLayoutObject, getLayoutChildObjects, createAtlasLayout, createVisualLayout, validateLayout } from './content/layout';
-import {
-  getFormatObject,
-  getExtendedFormatObject,
-  getFormatShadowObject,
-  getFormatLineHeightObject,
-  getFormatMarginPaddingObject,
-  convertFormatToExtendedFormat
-} from './content/style';
+import { updateEnv, setEnv } from './config/environment';
 
-const magicExport = () => {
-  console.log('magic export is crazy development');
-};
+import { PERMISSIONS } from './config/permissions';
+
+import injectPermissions from './middleware/inject-permissions';
+import secureByPermission from './middleware/secure-by-permission';
 
 // Webpack somehow requires proper objects ..
-const utilities = { isObject, cloneObject, unique, sleep, sleepWith, groupBy, roundTo };
-const layout = { createLayoutObject, getLayoutChildObjects, createAtlasLayout, createVisualLayout, validateLayout };
-const style = {
-  getFormatObject,
-  getExtendedFormatObject,
-  getFormatShadowObject,
-  getFormatLineHeightObject,
-  getFormatMarginPaddingObject,
-  convertFormatToExtendedFormat
+const environment = {
+  URL: 'http://localhost',
+  PORT: 2385,
+  NODE_ENV: 'production',
+  SSL: 'nossl',
+  ACCESS_CONTROL_URL: "LOLCAKE"
+};
+setEnv(environment);
+
+const updateEnvironment = env => {
+  console.log('[updateEnvironment] - In shared-code');
+  updateEnv(environment, env);
 };
 
-export { magicExport, utilities, layout, style };
+import uuid from 'uuid/v4';
+import fetch from 'cross-fetch';
+
+import * as utilities from './utilities';
+import * as layout from './content/layout';
+import * as style from './content/style';
+
+const magicExport = () => {
+  const id = uuid();
+  console.log('[SharedCode]', '>>>', id);
+};
+
+const middleware = { injectPermissions, secureByPermission };
+
+export {
+  magicExport,
+  environment,
+  updateEnvironment,
+  utilities,
+  layout,
+  style,
+  middleware,
+  PERMISSIONS
+};
