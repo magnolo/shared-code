@@ -1,4 +1,5 @@
 let environment = {};
+let fetch = () => {};
 
 const updateEnv = (env, processEnv) => {
   //console.log('>>> [updateEnv]', env)
@@ -13,4 +14,9 @@ const setEnv = env => {
   environment = env;
 }
 
-export { environment, updateEnv, setEnv };
+const setFetch = fetchFn => {
+  fetch = fetchFn;
+}
+
+
+export { environment, updateEnv, setEnv, fetch, setFetch };

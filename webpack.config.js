@@ -12,7 +12,7 @@ module.exports = {
   output: {
     library: 'shared-code',
     libraryTarget: 'umd',
-    globalObject: 'this',
+    globalObject: "typeof self !== 'undefined' ? self : this",
     umdNamedDefine: true,
     publicPath: '/',
     path: path.resolve(__dirname, './dist'),

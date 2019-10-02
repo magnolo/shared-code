@@ -59,6 +59,14 @@ const getExtendedFormatObject = (size, weight, position, color, shadow, lineheig
 };
 
 const convertFormatToExtendedFormat = (format, extendedFormat) => {
+  format.enabled = format.hasOwnProperty('enabled') ? format.enabled : true;
+  format.position = format.hasOwnProperty('position') ? format.position : 'left';
+  format.size = format.hasOwnProperty('size') ? format.size : 12;
+  format.weight = format.hasOwnProperty('weight') ? String(format.weight) : '300';
+  format.color = format.hasOwnProperty('color') ? format.color : '#000000';
+  format.fontFamily = format.hasOwnProperty('fontFamily') ? format.fontFamily : "'Work Sans', sans-serif";
+  format.letterSpacing = format.hasOwnProperty('letterSpacing') ? format.letterSpacing : 0;
+
   format.shadow = format.shadow || cloneObject(extendedFormat.shadow);
   format.margin = format.margin || cloneObject(extendedFormat.margin);
   format.padding = format.padding || cloneObject(extendedFormat.padding);

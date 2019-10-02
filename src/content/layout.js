@@ -70,16 +70,33 @@ const validateLayout = obj => {
       const childObjects = getLayoutChildObjects(layout);
       for (const child of childObjects) {
         if (['container'].includes(child.type)) {
-          // @hedata: ADDED BACKGROUND OPTIONS FOR CONTAINER ROW
           if (child.style.background === undefined) child.style.background = { backgroundColor: 'rgba(0, 0, 0, 0)' };
         }
         if (['container', 'root'].includes(child.type)) {
           if (child.style.position !== 'absolute' && child.style.zIndex === 1) child.style.zIndex = 'auto';
         }
       }
-
+      // fix atlas bug
+      if (layout.children[1].children[0].label === 'Left') {
+        const containerStyle = { flexDirection: 'column', alignItems: 'normal', zIndex: 'auto' };
+        const containerContent = createLayoutObject('container', 'Content', { ...containerStyle, flexGrow: 1, position: 'relative' });
+        const elementContentSelector = createLayoutObject('content-selector', 'Content Selector', { flexGrow: 1 });
+        const rowContentContainer = createLayoutObject('container', 'Row', { position: 'absolute', width: '100%', height: '100%', flexDirection: 'column' });
+        const rowContent1 = createLayoutObject('container', 'Row');
+        rowContentContainer.children.push(rowContent1);
+        containerContent.children.push(elementContentSelector, rowContentContainer);
+        layout.children[1] = containerContent;
+      }
       //layout.version = 3;
     }
+
+    const childObjects = getLayoutChildObjects(layout);
+    for (const child of childObjects) {
+      if (child.type === 'container' && child.style.position === 'absolute') {
+        child.style.top = 0;
+      }
+    }
+
     // END
   }
 
@@ -156,6 +173,12 @@ const createLayoutObject = (type, label, style = {}) => {
     });
   }
 
+  if (type === 'map-attributions') {
+    obj.options = Object.assign(obj.options, {
+      font: getExtendedFormatObject(9, undefined, undefined, '#000000')
+    });
+  }
+
   if (type === 'search') {
     obj.options = Object.assign(obj.options, {
       borderRadius: 100,
@@ -183,15 +206,7 @@ const createLayoutObject = (type, label, style = {}) => {
         margin: getFormatMarginPaddingObject(),
         pagination: getExtendedFormatObject(),
         padding: getFormatMarginPaddingObject(),
-        children: getExtendedFormatObject(
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          getFormatMarginPaddingObject(10, 'px', 10, 'px', 10, 'px', 10, 'px')
-        ),
+        children: getExtendedFormatObject(undefined, undefined, undefined, undefined, undefined, undefined, getFormatMarginPaddingObject(10, 'px', 10, 'px', 10, 'px', 10, 'px')),
         boxShadow: getFormatShadowObject(0, 2, 25, 0, 'rgba(0, 0, 0, 0.2)'),
         images: {
           width: {
