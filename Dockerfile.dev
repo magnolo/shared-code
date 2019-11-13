@@ -1,21 +1,11 @@
-FROM node:12-slim
+FROM spacegregor/node-dockerize:12
 
-# Provide APP_PATH
-ENV APP_PATH /usr/src/app
-
-# Grant Node more Memory
-ARG node_options
-ENV NODE_OPTIONS=$node_options
-# RUN cat /proc/meminfo
-# RUN echo ${NODE_OPTIONS}
-
-# Copy Node package definition
-WORKDIR ${APP_PATH}
+# Copy Node packages
 COPY package.json ${APP_PATH}
 COPY yarn.lock ${APP_PATH}
 
-# Install Node packages
-RUN yarn --pure-lockfile
+# Install node packages
+RUN yarn --pure-lockfile --ignore-engines
 
 # Copy Codebase
 COPY . ${APP_PATH}
