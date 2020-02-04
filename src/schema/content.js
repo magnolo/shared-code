@@ -90,7 +90,14 @@ const ContentSchema = new Schema(
       required: true
     },
     //type Specific content goes here
-    typeSpecific: {},
+    typeSpecific: {
+      type: {
+        isChild: {
+          type: Boolean,
+          index: true
+        }
+      }
+    },
     created_at: {
       type: Date,
       default: Date.now
@@ -160,7 +167,7 @@ ContentSchema.virtual('vDataSet', {
   localField: 'dataSetSlug', // Find people where `localField`
   foreignField: 'slug', // is equal to `foreignField`
   justOne: true,
-  options: { match: { deleted_at: null, 'versioning.latest': true } }
+  options: { match: { 'versioning.latest': true } }
 });
 
 ContentSchema.virtual('vPreviewTags', {
@@ -174,6 +181,18 @@ ContentSchema.virtual('vPreviewTags', {
 });
 
 ContentSchema.index({ name: 1 }, { collation: { locale: 'de', strength: 1 } });
+//Indexes for faster search improvement 1 asc, -1 desc
+//my visuals
+
+ContentSchema.index({ userId: -1, deleted_at: 1, 'versioning.latest': -1, created_at: -1, 'typeSpecific.isChild': 1, type: 1 }, { name: 'myvisualscreatedidx' });
+ContentSchema.index({ userId: -1, deleted_at: 1, 'versioning.latest': -1, updated_at: -1, 'typeSpecific.isChild': 1, type: 1 }, { name: 'myvisualsidx' });
+ContentSchema.index({ userId: -1, deleted_at: 1, 'versioning.latest': -1, 'metrics.impressions': -1, 'typeSpecific.isChild': 1, type: 1 }, { name: 'myvisualsimpidx' });
+//public visuals
+ContentSchema.index({ access: -1, deleted_at: 1, 'versioning.latest': -1, updated_at: -1, 'typeSpecific.isChild': 1, type: 1 }, { name: 'publixvisualsidx' });
+ContentSchema.index({ access: -1, deleted_at: 1, 'versioning.latest': -1, 'metrics.impressions': -1, 'typeSpecific.isChild': 1, type: 1 }, { name: 'publixvisualsimpidx' });
+//from my data
+ContentSchema.index({ access: -1, dataSetOwnerId: -1, deleted_at: 1, 'metrics.impressions': -1, 'versioning.latest': -1, 'typeSpecific.isChild': 1, userId: -1 }, { name: 'frommydataimpidx' });
+ContentSchema.index({ access: -1, dataSetOwnerId: -1, deleted_at: 1, updated_at: -1, 'versioning.latest': -1, 'typeSpecific.isChild': 1, userId: -1 }, { name: 'frommydataidx' });
 
 ContentSchema.pre('save', async function(next) {
   try {
@@ -181,7 +200,7 @@ ContentSchema.pre('save', async function(next) {
     this.slug = createHashSlug(this);
     next();
   } catch (error) {
-    console.log('[ContentSchema]', 'pre save error', error);
+    console.log('[ContentSchema] pre save error', error);
   }
 });
 

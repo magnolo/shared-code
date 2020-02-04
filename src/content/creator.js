@@ -1,15 +1,15 @@
-const uniqueInVisualFilterTypes = ["valueSelector"];
+const uniqueInVisualFilterTypes = ['valueSelector'];
 
-import { cloneObject, unique } from "../utilities";
+import { cloneObject, unique } from '../utilities';
 
 export const getBaseInvisualFilterValueSelector = (fieldName, appearance) => {
   return {
-    type: "valueSelector",
+    type: 'valueSelector',
     fieldName: fieldName,
     options: {
       appearance: appearance,
-      sort: "asc",
-      saveState: "last"
+      sort: 'asc',
+      saveState: 'last'
     }
   };
 };
@@ -17,19 +17,11 @@ export const getBaseInvisualFilterValueSelector = (fieldName, appearance) => {
 /**
   no double fields in dimensions
  */
-export const switchVisualConfigurationDimensions = (
-  visualConfiguration,
-  changedDimension
-) => {
+export const switchVisualConfigurationDimensions = (visualConfiguration, changedDimension) => {
   for (const dimension of visualConfiguration.dimensions) {
-    if (
-      dimension.dimName !== changedDimension.dimName &&
-      dimension.fieldName === changedDimension.fieldName
-    ) {
+    if (dimension.dimName !== changedDimension.dimName && dimension.fieldName === changedDimension.fieldName) {
       // ohoh
-      dimension.fieldName = dimension.possibleFields.filter(
-        el => el.fieldName !== dimension.fieldName
-      )[0].fieldName;
+      dimension.fieldName = dimension.possibleFields.filter(el => el.fieldName !== dimension.fieldName)[0].fieldName;
     }
   }
   return visualConfiguration;
@@ -38,11 +30,7 @@ export const switchVisualConfigurationDimensions = (
 /**
  * maps new dimensions to old data namings
  */
-export const enhanceVisualOptionsWithVisualConfiguration = (
-  visualConfiguration,
-  visualOptions,
-  fields
-) => {
+export const enhanceVisualOptionsWithVisualConfiguration = (visualConfiguration, visualOptions, fields) => {
   visualOptions.labelField = null;
   visualOptions.timeField = null;
   visualOptions.valueField = null;
@@ -64,70 +52,67 @@ export const enhanceVisualOptionsWithVisualConfiguration = (
         if (uniqueFilter.filterObj) {
           filterObj = uniqueFilter.filterObj;
         } else {
-          filterObj = getBaseInvisualFilterValueSelector(
-            uniqueFilter.fieldName,
-            "timeline"
-          );
+          filterObj = getBaseInvisualFilterValueSelector(uniqueFilter.fieldName, 'timeline');
         }
         visualOptions.inVisualFilter.push(filterObj);
       }
     }
   }
   switch (visualConfiguration.type) {
-    case "areachart":
-    case "linechart":
+    case 'areachart':
+    case 'linechart':
       for (const dimension of visualConfiguration.dimensions) {
-        if (dimension.dimName === "xAxis") {
+        if (dimension.dimName === 'xAxis') {
           visualOptions.timeField = dimension.fieldName;
         }
-        if (dimension.dimName === "yAxis") {
+        if (dimension.dimName === 'yAxis') {
           visualOptions.valueField = dimension.fieldName;
         }
         // series axis
-        if (dimension.dimName === "labelAxis") {
+        if (dimension.dimName === 'labelAxis') {
           visualOptions.labelField = dimension.fieldName;
         }
       }
       break;
-    case "barchart":
-    case "horizontalbarchart":
-    case "donutchart":
-    case "donutchart_half":
+    case 'barchart':
+    case 'horizontalbarchart':
+    case 'donutchart':
+    case 'donutchart_half':
       for (const dimension of visualConfiguration.dimensions) {
-        if (dimension.dimName === "xAxis") {
+        if (dimension.dimName === 'xAxis') {
           visualOptions.labelField = dimension.fieldName;
         }
-        if (dimension.dimName === "yAxis") {
+        if (dimension.dimName === 'yAxis') {
           visualOptions.valueField = dimension.fieldName;
         }
       }
       break;
-    case "groupedbarchart":
-    case "stackedbarchart":
-    case "bar-grouped-horizontal":
-    case "bar-stacked-horizontal":
+    case 'groupedbarchart':
+    case 'stackedbarchart':
+    case 'bar-grouped-horizontal':
+    case 'bar-stacked-horizontal':
       // label field is the field that is used for series
       // aggregation Field is used for xAxis and Tooltips
       for (const dimension of visualConfiguration.dimensions) {
-        if (dimension.dimName === "xAxis") {
+        if (dimension.dimName === 'xAxis') {
           visualOptions.labelField = dimension.fieldName;
         }
-        if (dimension.dimName === "yAxis") {
+        if (dimension.dimName === 'yAxis') {
           visualOptions.valueField = dimension.fieldName;
         }
-        if (dimension.dimName === "groupAxis") {
+        if (dimension.dimName === 'groupAxis') {
           visualOptions.aggregationField = dimension.fieldName;
         }
       }
       break;
-    case "choropleth":
+    case 'choropleth':
       for (const dimension of visualConfiguration.dimensions) {
-        if (dimension.dimName === "iso") {
+        if (dimension.dimName === 'iso') {
           visualOptions.labelField = dimension.fieldName;
           // get the isoField :
           visualOptions.isoField = fields[dimension.fieldName].isoIsoField;
         }
-        if (dimension.dimName === "value") {
+        if (dimension.dimName === 'value') {
           visualOptions.valueField = dimension.fieldName;
         }
       }
@@ -140,12 +125,12 @@ export const enhanceVisualOptionsWithVisualConfiguration = (
 export const getTooltips = (fields, visualOptions) => {
   //console.log('get tooltips', fields, visualOptions);
   const toolTips = {};
-  toolTips.event = "click";
-  toolTips.type = "old";
-  toolTips.name = "data:" + visualOptions.labelField;
+  toolTips.event = 'click';
+  toolTips.type = 'old';
+  toolTips.name = 'data:' + visualOptions.labelField;
   toolTips.value = {
-    label: "", //fields[visualOptions.valueField].title,
-    field: "data:" + visualOptions.valueField,
+    label: '', //fields[visualOptions.valueField].title,
+    field: 'data:' + visualOptions.valueField,
     format: cloneObject(fields[visualOptions.valueField].format)
   };
   toolTips.fields = [];
@@ -153,29 +138,22 @@ export const getTooltips = (fields, visualOptions) => {
 };
 
 export const getChartLabelAxis = (fields, type, visualOptions) => {
-  if (["areachart", "linechart"].includes(type)) {
+  if (['areachart', 'linechart'].includes(type)) {
     return {
       enabled: true,
-      title: "", //fields[visualOptions.timeField].title,
+      title: '', //fields[visualOptions.timeField].title,
       format: cloneObject(fields[visualOptions.timeField].format)
     };
-  } else if (
-    [
-      "groupedbarchart",
-      "stackedbarchart",
-      "bar-grouped-horizontal",
-      "bar-stacked-horizontal"
-    ].includes(type)
-  ) {
+  } else if (['groupedbarchart', 'stackedbarchart', 'bar-grouped-horizontal', 'bar-stacked-horizontal'].includes(type)) {
     return {
       enabled: true,
-      title: "", //fields[visualOptions.aggregationField].title,
+      title: '', //fields[visualOptions.aggregationField].title,
       format: cloneObject(fields[visualOptions.aggregationField].format)
     };
   } else {
     return {
       enabled: true,
-      title: "", //cloneObject(fields[visualOptions.labelField].title),
+      title: '', //cloneObject(fields[visualOptions.labelField].title),
       format: cloneObject(fields[visualOptions.labelField].format)
     };
   }
@@ -184,7 +162,7 @@ export const getChartLabelAxis = (fields, type, visualOptions) => {
 export const getChartValueAxis = (fields, type, visualOptions) => {
   return {
     enabled: true,
-    title: "", //cloneObject(fields[visualOptions.valueField].title),//fields[visualOptions.valueField].title,
+    title: '', //cloneObject(fields[visualOptions.valueField].title),//fields[visualOptions.valueField].title,
     format: cloneObject(fields[visualOptions.valueField].format)
   };
 };
@@ -205,21 +183,14 @@ export const getChartSorting = (fields, type, visualOptions) => {
   return sortOrder;
 };
 
-export const applyVisualConfigurationToContent = (
-  content,
-  visualConfiguration,
-  data,
-  formattingChanges = true
-) => {
+export const applyVisualConfigurationToContent = (content, visualConfiguration, data, formattingChanges = true) => {
   // set is needed for uniqueNess false for all fields
   const backupUniqueFilterValues = {};
   for (const fieldName of Object.keys(content.typeSpecific.fields)) {
     const field = content.typeSpecific.fields[fieldName];
     if (field.isNeededForUniqueness) {
       // console.log('DESELECTING FORMERY SELECTED FIELD');
-      backupUniqueFilterValues[fieldName] = JSON.parse(
-        JSON.stringify(field.selectedValues)
-      );
+      backupUniqueFilterValues[fieldName] = JSON.parse(JSON.stringify(field.selectedValues));
       field.isNeededForUniqueness = false;
       field.selectedValues = [];
     }
@@ -232,31 +203,18 @@ export const applyVisualConfigurationToContent = (
       // console.log("ADDING EDITOR FILTER", uniqueFilter)
       // see if we have a backup value
       if (backupUniqueFilterValues[uniqueFilter.fieldName]) {
-        content.typeSpecific.fields[
-          uniqueFilter.fieldName
-        ].isNeededForUniqueness = true;
-        content.typeSpecific.fields[uniqueFilter.fieldName].selectedValues =
-          backupUniqueFilterValues[uniqueFilter.fieldName];
+        content.typeSpecific.fields[uniqueFilter.fieldName].isNeededForUniqueness = true;
+        content.typeSpecific.fields[uniqueFilter.fieldName].selectedValues = backupUniqueFilterValues[uniqueFilter.fieldName];
       } else {
-        const uniqueValues = unique(
-          data.map(obj => obj[uniqueFilter.fieldName])
-        );
+        const uniqueValues = unique(data.map(obj => obj[uniqueFilter.fieldName]));
         const selectedValue = uniqueValues[0];
-        content.typeSpecific.fields[
-          uniqueFilter.fieldName
-        ].isNeededForUniqueness = true;
-        content.typeSpecific.fields[uniqueFilter.fieldName].selectedValues = [
-          selectedValue
-        ];
+        content.typeSpecific.fields[uniqueFilter.fieldName].isNeededForUniqueness = true;
+        content.typeSpecific.fields[uniqueFilter.fieldName].selectedValues = [selectedValue];
       }
     }
   }
   // console.log("BEFORE ENHANCE CONFIG", content);
-  const visualOptions = enhanceVisualOptionsWithVisualConfiguration(
-    visualConfiguration,
-    {},
-    content.typeSpecific.fields
-  );
+  const visualOptions = enhanceVisualOptionsWithVisualConfiguration(visualConfiguration, {}, content.typeSpecific.fields);
   // things that have to be applied
   content.type = visualConfiguration.type;
   // data
@@ -271,13 +229,9 @@ export const applyVisualConfigurationToContent = (
   // invisualFilters
 
   //get all invisual filers that are multivalue
-  const multiValueFilters = content.typeSpecific.inVisualFilter.filter(
-    el => el.type == "multiValueSelector"
-  );
+  const multiValueFilters = content.typeSpecific.inVisualFilter.filter(el => el.type == 'multiValueSelector');
   content.typeSpecific.inVisualFilter = visualOptions.inVisualFilter;
-  content.typeSpecific.inVisualFilter = content.typeSpecific.inVisualFilter.concat(
-    multiValueFilters
-  );
+  content.typeSpecific.inVisualFilter = content.typeSpecific.inVisualFilter.concat(multiValueFilters);
 
   // dimensions
   content.typeSpecific.dimensions = visualConfiguration.dimensions;
@@ -301,60 +255,38 @@ export const applyVisualConfigurationToContent = (
     // add title style and content style if exists -> v6 Compability
 
     // chart.sorting
-    content.typeSpecific.chart.sorting.sortFields = getChartSorting(
-      content.typeSpecific.fields,
-      visualConfiguration.type,
-      visualOptions
-    );
+    content.typeSpecific.chart.sorting.sortFields = getChartSorting(content.typeSpecific.fields, visualConfiguration.type, visualOptions);
     // chart.axis
-    const chartLabelAxis = getChartLabelAxis(
-      content.typeSpecific.fields,
-      visualConfiguration.type,
-      visualOptions
-    );
+    const chartLabelAxis = getChartLabelAxis(content.typeSpecific.fields, visualConfiguration.type, visualOptions);
     // add title style and content style if exists -> v6 Compability
     if (content.typeSpecific.chart.axis.labelAxis.titleStyle) {
-      chartLabelAxis.titleStyle =
-        content.typeSpecific.chart.axis.labelAxis.titleStyle;
-      chartLabelAxis.valueStyle =
-        content.typeSpecific.chart.axis.labelAxis.valueStyle;
+      chartLabelAxis.titleStyle = content.typeSpecific.chart.axis.labelAxis.titleStyle;
+      chartLabelAxis.valueStyle = content.typeSpecific.chart.axis.labelAxis.valueStyle;
     }
     content.typeSpecific.chart.axis.labelAxis = chartLabelAxis;
 
-    const valueAxis = getChartValueAxis(
-      content.typeSpecific.fields,
-      visualConfiguration.type,
-      visualOptions
-    );
+    const valueAxis = getChartValueAxis(content.typeSpecific.fields, visualConfiguration.type, visualOptions);
     if (content.typeSpecific.chart.axis.valueAxis.titleStyle) {
-      valueAxis.titleStyle =
-        content.typeSpecific.chart.axis.valueAxis.titleStyle;
-      valueAxis.valueStyle =
-        content.typeSpecific.chart.axis.valueAxis.valueStyle;
+      valueAxis.titleStyle = content.typeSpecific.chart.axis.valueAxis.titleStyle;
+      valueAxis.valueStyle = content.typeSpecific.chart.axis.valueAxis.valueStyle;
     }
 
     content.typeSpecific.chart.axis.valueAxis = valueAxis;
     // chart values
-    content.typeSpecific.chart.values.format = cloneObject(
-      content.typeSpecific.fields[visualOptions.valueField].format
-    );
+    content.typeSpecific.chart.values.format = cloneObject(content.typeSpecific.fields[visualOptions.valueField].format);
     // map.legend.values
     // map.legend.title
     if (content.typeSpecific.map && content.typeSpecific.map.legend) {
-      content.typeSpecific.map.legend.values.format = cloneObject(
-        content.typeSpecific.fields[visualOptions.valueField].format
-      );
-      content.typeSpecific.map.legend.title.format = cloneObject(
-        content.typeSpecific.fields[visualOptions.labelField].format
-      );
+      content.typeSpecific.map.legend.values.format = cloneObject(content.typeSpecific.fields[visualOptions.valueField].format);
+      content.typeSpecific.map.legend.title.format = cloneObject(content.typeSpecific.fields[visualOptions.labelField].format);
     }
     // console.log("AFTER", content);
 
     // style area chart und linechart → disable range coloring
-    if (content.type === "areachart" || content.type === "linechart") {
+    if (content.type === 'areachart' || content.type === 'linechart') {
       if (content.typeSpecific.style && content.typeSpecific.style.colors2) {
-        if (content.typeSpecific.style.colors2.type === "range") {
-          content.typeSpecific.style.colors2.type = "continuous";
+        if (content.typeSpecific.style.colors2.type === 'range') {
+          content.typeSpecific.style.colors2.type = 'continuous';
         }
       }
     }
@@ -378,10 +310,7 @@ export const generateVisualConfigurationFromContent = (content, data) => {
   };
   // recreate Possible Fields
   for (const dimension of visualConfiguration.dimensions) {
-    dimension.possibleFields = getPossibleFieldsForDimension(
-      dimension,
-      content
-    );
+    dimension.possibleFields = getPossibleFieldsForDimension(dimension, content);
   }
   for (const fieldName of Object.keys(content.typeSpecific.fields)) {
     const field = content.typeSpecific.fields[fieldName];
@@ -393,9 +322,7 @@ export const generateVisualConfigurationFromContent = (content, data) => {
         possibleFields: Object.keys(content.typeSpecific.fields)
           .filter(
             el =>
-              content.typeSpecific.fields[el].fieldType === "miscField" ||
-              content.typeSpecific.fields[el].fieldType === "timeField" ||
-              content.typeSpecific.fields[el].fieldType === "isoLabelField"
+              content.typeSpecific.fields[el].fieldType === 'miscField' || content.typeSpecific.fields[el].fieldType === 'timeField' || content.typeSpecific.fields[el].fieldType === 'isoLabelField'
           )
           .map(el => {
             return {
@@ -404,7 +331,7 @@ export const generateVisualConfigurationFromContent = (content, data) => {
             };
           }),
         inVisual: false,
-        filterObj: getBaseInvisualFilterValueSelector(fieldName, "timeline")
+        filterObj: getBaseInvisualFilterValueSelector(fieldName, 'timeline')
       });
     }
   }
@@ -417,9 +344,7 @@ export const generateVisualConfigurationFromContent = (content, data) => {
         possibleFields: Object.keys(content.typeSpecific.fields)
           .filter(
             el =>
-              content.typeSpecific.fields[el].fieldType === "miscField" ||
-              content.typeSpecific.fields[el].fieldType === "timeField" ||
-              content.typeSpecific.fields[el].fieldType === "isoLabelField"
+              content.typeSpecific.fields[el].fieldType === 'miscField' || content.typeSpecific.fields[el].fieldType === 'timeField' || content.typeSpecific.fields[el].fieldType === 'isoLabelField'
           )
           .map(el => {
             return {
@@ -445,39 +370,20 @@ const compareFieldTypeOrder = (a, b) => {
 const backTrackUniquenessCheck = (visualConfiguration, content, data) => {
   //we have a visualConfiguration that is valid
   //get the fields used
-  let validVisualConfiguration = JSON.parse(
-    JSON.stringify(visualConfiguration)
-  );
+  let validVisualConfiguration = JSON.parse(JSON.stringify(visualConfiguration));
 
   const usedFields = visualConfiguration.uniqueFilters.map(el => el.fieldName);
   //can we remove some fields
   if (usedFields.length > 1) {
-    console.log(
-      "[backTrackUniquenessCheck] - more than 1 field found ",
-      usedFields.length,
-      usedFields
-    );
+    console.log('[backTrackUniquenessCheck] - more than 1 field found ', usedFields.length, usedFields);
     //can we remove a field?
     for (const fieldName of usedFields) {
-      const visualConfigurationBackup = JSON.parse(
-        JSON.stringify(validVisualConfiguration)
-      );
-      const filterIndex = visualConfigurationBackup.uniqueFilters.findIndex(
-        el => el.fieldName === fieldName
-      );
+      const visualConfigurationBackup = JSON.parse(JSON.stringify(validVisualConfiguration));
+      const filterIndex = visualConfigurationBackup.uniqueFilters.findIndex(el => el.fieldName === fieldName);
       if (filterIndex > -1) {
         visualConfigurationBackup.uniqueFilters.splice(filterIndex, 1);
-        const valid = testVisualConfiugration(
-          visualConfigurationBackup,
-          data,
-          content.typeSpecific.fields
-        );
-        console.log(
-          "[backTrackUniquenessCheck] - removed: ",
-          fieldName,
-          " valid: ",
-          valid
-        );
+        const valid = testVisualConfiugration(visualConfigurationBackup, data, content.typeSpecific.fields);
+        console.log('[backTrackUniquenessCheck] - removed: ', fieldName, ' valid: ', valid);
         if (valid) {
           visualConfigurationBackup.valid = true;
           validVisualConfiguration = visualConfigurationBackup;
@@ -488,27 +394,13 @@ const backTrackUniquenessCheck = (visualConfiguration, content, data) => {
   return validVisualConfiguration;
 };
 
-export const addUniqueFilterToVisualConfigurationAndTestUntilValid = (
-  visualConfiguration,
-  content,
-  data
-) => {
-  const loops =
-    Object.keys(content.typeSpecific.fields).length -
-    visualConfiguration.dimensions.length;
+export const addUniqueFilterToVisualConfigurationAndTestUntilValid = (visualConfiguration, content, data) => {
+  const loops = Object.keys(content.typeSpecific.fields).length - visualConfiguration.dimensions.length;
   for (let i = 0; i < loops; i++) {
-    visualConfiguration = addUniqueFilterToVisualConfigurationAndTest(
-      visualConfiguration,
-      content,
-      data
-    );
+    visualConfiguration = addUniqueFilterToVisualConfigurationAndTest(visualConfiguration, content, data);
     if (visualConfiguration.valid) {
       //backtrack visual configuration
-      visualConfiguration = backTrackUniquenessCheck(
-        visualConfiguration,
-        content,
-        data
-      );
+      visualConfiguration = backTrackUniquenessCheck(visualConfiguration, content, data);
       break;
     }
   }
@@ -518,17 +410,13 @@ export const addUniqueFilterToVisualConfigurationAndTestUntilValid = (
 export const getSortedFieldNamesForUnqiueness = content => {
   return Object.keys(content.typeSpecific.fields)
     .filter(
-      el =>
-        content.typeSpecific.fields[el].fieldType === "miscField" ||
-        content.typeSpecific.fields[el].fieldType === "timeField" ||
-        content.typeSpecific.fields[el].fieldType === "isoLabelField"
+      el => content.typeSpecific.fields[el].fieldType === 'miscField' || content.typeSpecific.fields[el].fieldType === 'timeField' || content.typeSpecific.fields[el].fieldType === 'isoLabelField'
     )
     .map(el => {
       let order = 0;
-      if (content.typeSpecific.fields[el].fieldType === "isoLabelField")
-        order = 3;
-      if (content.typeSpecific.fields[el].fieldType === "timeField") order = 2;
-      if (content.typeSpecific.fields[el].fieldType === "miscField") order = 1;
+      if (content.typeSpecific.fields[el].fieldType === 'isoLabelField') order = 3;
+      if (content.typeSpecific.fields[el].fieldType === 'timeField') order = 2;
+      if (content.typeSpecific.fields[el].fieldType === 'miscField') order = 1;
       return {
         fieldName: content.typeSpecific.fields[el].fieldName,
         title: content.typeSpecific.fields[el].title,
@@ -538,23 +426,15 @@ export const getSortedFieldNamesForUnqiueness = content => {
     .sort(compareFieldTypeOrder);
 };
 
-const addUniqueFilterToVisualConfigurationAndTest = (
-  visualConfiguration,
-  content,
-  data
-) => {
+const addUniqueFilterToVisualConfigurationAndTest = (visualConfiguration, content, data) => {
   // try unique filter
   const allfieldNames = getSortedFieldNamesForUnqiueness(content);
   //we have information about
 
   // console.log('ordered fieldNames: ', allfieldNames);
-  let usedFields = visualConfiguration.dimensions
-    .filter(el => el.fieldName !== undefined)
-    .map(el => el.fieldName);
+  let usedFields = visualConfiguration.dimensions.filter(el => el.fieldName !== undefined).map(el => el.fieldName);
   // add old uniqueFilters into this
-  usedFields = usedFields.concat(
-    visualConfiguration.uniqueFilters.map(el => el.fieldName)
-  );
+  usedFields = usedFields.concat(visualConfiguration.uniqueFilters.map(el => el.fieldName));
   // console.log('used Fields', usedFields);
   let notUsedField = null;
   for (const field of allfieldNames) {
@@ -573,13 +453,9 @@ const addUniqueFilterToVisualConfigurationAndTest = (
       possibleFields: allfieldNames,
       fieldTitle: content.typeSpecific.fields[notUsedField].title,
       inVisual: true,
-      filterObj: getBaseInvisualFilterValueSelector(notUsedField, "dropdown")
+      filterObj: getBaseInvisualFilterValueSelector(notUsedField, 'dropdown')
     });
-    const valid = testVisualConfiugration(
-      visualConfiguration,
-      data,
-      content.typeSpecific.fields
-    );
+    const valid = testVisualConfiugration(visualConfiguration, data, content.typeSpecific.fields);
     visualConfiguration.valid = valid;
     //console.log("[Creator] - VisualConfiguration after ADD: ",JSON.parse(JSON.stringify(visualConfiguration)));
     return visualConfiguration;
@@ -594,12 +470,7 @@ const addUniqueFilterToVisualConfigurationAndTest = (
  * @param  content                  content item
  * @return new Visual Configuration
  */
-export const transformVisualConfigurationFromDifferentType = (
-  oldVisualConfiguration,
-  newVisualConfiguration,
-  data,
-  content
-) => {
+export const transformVisualConfigurationFromDifferentType = (oldVisualConfiguration, newVisualConfiguration, data, content) => {
   /**
    * - Map:
    *      - Region  (IsoLabelField)
@@ -625,11 +496,9 @@ export const transformVisualConfigurationFromDifferentType = (
   for (const dimension of newVisualConfiguration.dimensions) {
     // axis are applied in the order the come in the array
     // value Field parts shall be reused
-    if (dimension.requirements.fieldTypes.includes("valueField")) {
+    if (dimension.requirements.fieldTypes.includes('valueField')) {
       // lets find the respective dimension in oldVisualConfiguration
-      const oldValueDimension = oldVisualConfiguration.dimensions.find(el =>
-        el.requirements.fieldTypes.includes("valueField")
-      );
+      const oldValueDimension = oldVisualConfiguration.dimensions.find(el => el.requirements.fieldTypes.includes('valueField'));
       if (oldValueDimension) {
         dimension.fieldName = oldValueDimension.fieldName;
         usedFields.push(dimension.fieldName);
@@ -638,12 +507,7 @@ export const transformVisualConfigurationFromDifferentType = (
       }
     } else {
       const oldDimension = oldVisualConfiguration.dimensions[index];
-      if (
-        oldDimension &&
-        dimension.requirements.fieldTypes.includes(
-          content.typeSpecific.fields[oldDimension.fieldName].fieldType
-        )
-      ) {
+      if (oldDimension && dimension.requirements.fieldTypes.includes(content.typeSpecific.fields[oldDimension.fieldName].fieldType)) {
         dimension.fieldName = oldDimension.fieldName;
         usedFields.push(dimension.fieldName);
       } else {
@@ -652,18 +516,12 @@ export const transformVisualConfigurationFromDifferentType = (
           usedFields.push(dimension.fieldName);
         } else {
           // try to find a different field from the potential fields part
-          const freeField = dimension.possibleFields.find(
-            el => !usedFields.includes(el.fieldName)
-          );
+          const freeField = dimension.possibleFields.find(el => !usedFields.includes(el.fieldName));
           if (freeField) {
             dimension.fieldName = freeField.fieldName;
             usedFields.push(dimension.fieldName);
           } else {
-            console.error(
-              "[Creator] Error couldnt't find free field ",
-              newVisualConfiguration,
-              dimension
-            );
+            console.error("[Creator] Error couldnt't find free field ", newVisualConfiguration, dimension);
           }
         }
       }
@@ -679,10 +537,7 @@ export const testVisualConfiugration = (visualConfiguration, data, fields) => {
   const fieldNameListForUniqueCheck = [];
   for (const dimension of visualConfiguration.dimensions) {
     // console.log('DIMENSION: CHECK: ', dimension);
-    if (
-      !fieldNameListForUniqueCheck.includes(dimension.fieldName) &&
-      dimension.usedForUniqueness
-    ) {
+    if (!fieldNameListForUniqueCheck.includes(dimension.fieldName) && dimension.usedForUniqueness) {
       fieldNameListForUniqueCheck.push(dimension.fieldName);
     }
   }
@@ -698,44 +553,34 @@ export const testVisualConfiugration = (visualConfiguration, data, fields) => {
 };
 
 export const getDimensionsWithRequirements = type => {
-  const mapTypes = ["choropleth"];
-  const twoDimensionalChartTypes = [
-    "barchart",
-    "horizontalbarchart",
-    "donutchart",
-    "donutchart_half"
-  ];
-  const groupedChartTypes = [
-    "groupedbarchart",
-    "stackedbarchart",
-    "bar-grouped-horizontal",
-    "bar-stacked-horizontal"
-  ];
-  const timeChartTypes = ["areachart", "linechart"];
+  const mapTypes = ['choropleth'];
+  const twoDimensionalChartTypes = ['barchart', 'horizontalbarchart', 'donutchart', 'donutchart_half'];
+  const groupedChartTypes = ['groupedbarchart', 'stackedbarchart', 'bar-grouped-horizontal', 'bar-stacked-horizontal'];
+  const timeChartTypes = ['areachart', 'linechart'];
 
   if (mapTypes.includes(type)) {
     switch (type) {
-      case "choropleth":
+      case 'choropleth':
         return [
           {
-            dimName: "iso",
-            dimLabel: "Region",
+            dimName: 'iso',
+            dimLabel: 'Region',
             fieldName: undefined,
             usedForUniqueness: true,
             requirements: {
-              dataTypes: ["string"],
-              fieldTypes: ["isoLabelField"],
+              dataTypes: ['string'],
+              fieldTypes: ['isoLabelField'],
               minValues: 1
             },
             possibleFields: []
           },
           {
-            dimName: "value",
-            dimLabel: "Value",
+            dimName: 'value',
+            dimLabel: 'Value',
             usedForUniqueness: false,
             fieldName: undefined,
             requirements: {
-              fieldTypes: ["valueField"],
+              fieldTypes: ['valueField'],
               minValues: 1
             },
             possibleFields: []
@@ -750,51 +595,51 @@ export const getDimensionsWithRequirements = type => {
   if (twoDimensionalChartTypes.includes(type)) {
     // twoDimensionalChartTypes = ['barchart', 'horizontalbarchart', 'donutchart', 'donutchart_half'];
     switch (type) {
-      case "barchart":
+      case 'barchart':
         return [
           {
-            dimName: "xAxis",
-            dimLabel: "X - Axis",
+            dimName: 'xAxis',
+            dimLabel: 'X - Axis',
             fieldName: undefined,
             usedForUniqueness: true,
             requirements: {
-              fieldTypes: ["miscField", "isoLabelField", "timeField"],
+              fieldTypes: ['miscField', 'isoLabelField', 'timeField'],
               minValues: 2
             },
             possibleFields: []
           },
           {
-            dimName: "yAxis",
-            dimLabel: "Y - Axis",
+            dimName: 'yAxis',
+            dimLabel: 'Y - Axis',
             usedForUniqueness: false,
             fieldName: undefined,
             requirements: {
-              fieldTypes: ["valueField"],
+              fieldTypes: ['valueField'],
               minValues: 2
             },
             possibleFields: []
           }
         ];
-      case "horizontalbarchart":
+      case 'horizontalbarchart':
         return [
           {
-            dimName: "xAxis",
-            dimLabel: "Y - Axis",
+            dimName: 'xAxis',
+            dimLabel: 'Y - Axis',
             fieldName: undefined,
             usedForUniqueness: true,
             requirements: {
-              fieldTypes: ["miscField", "isoLabelField", "timeField"],
+              fieldTypes: ['miscField', 'isoLabelField', 'timeField'],
               minValues: 2
             },
             possibleFields: []
           },
           {
-            dimName: "yAxis",
-            dimLabel: "X - Axis",
+            dimName: 'yAxis',
+            dimLabel: 'X - Axis',
             usedForUniqueness: false,
             fieldName: undefined,
             requirements: {
-              fieldTypes: ["valueField"],
+              fieldTypes: ['valueField'],
               minValues: 2
             },
             possibleFields: []
@@ -803,23 +648,23 @@ export const getDimensionsWithRequirements = type => {
       default:
         return [
           {
-            dimName: "xAxis",
-            dimLabel: "X - Axis",
+            dimName: 'xAxis',
+            dimLabel: 'X - Axis',
             fieldName: undefined,
             usedForUniqueness: true,
             requirements: {
-              fieldTypes: ["miscField", "isoLabelField", "timeField"],
+              fieldTypes: ['miscField', 'isoLabelField', 'timeField'],
               minValues: 2
             },
             possibleFields: []
           },
           {
-            dimName: "yAxis",
-            dimLabel: "Y - Axis",
+            dimName: 'yAxis',
+            dimLabel: 'Y - Axis',
             usedForUniqueness: false,
             fieldName: undefined,
             requirements: {
-              fieldTypes: ["valueField"],
+              fieldTypes: ['valueField'],
               minValues: 2
             },
             possibleFields: []
@@ -830,152 +675,152 @@ export const getDimensionsWithRequirements = type => {
 
   if (groupedChartTypes.includes(type)) {
     switch (type) {
-      case "stackedbarchart":
+      case 'stackedbarchart':
         return [
           {
-            dimName: "groupAxis",
-            dimLabel: "X - Axis",
+            dimName: 'groupAxis',
+            dimLabel: 'X - Axis',
             fieldName: undefined,
             usedForUniqueness: true,
             requirements: {
-              fieldTypes: ["miscField", "isoLabelField", "timeField"],
+              fieldTypes: ['miscField', 'isoLabelField', 'timeField'],
               minValues: 1
             },
             possibleFields: []
           },
           {
-            dimName: "xAxis",
-            dimLabel: "Stacks",
+            dimName: 'xAxis',
+            dimLabel: 'Stacks',
             fieldName: undefined,
             usedForUniqueness: true,
             requirements: {
-              fieldTypes: ["miscField", "isoLabelField", "timeField"],
+              fieldTypes: ['miscField', 'isoLabelField', 'timeField'],
               minValues: 2
             },
             possibleFields: []
           },
           {
-            dimName: "yAxis",
-            dimLabel: "Y - Axis",
+            dimName: 'yAxis',
+            dimLabel: 'Y - Axis',
             usedForUniqueness: false,
             fieldName: undefined,
             requirements: {
-              fieldTypes: ["valueField"],
+              fieldTypes: ['valueField'],
               minValues: 2
             },
             possibleFields: []
           }
         ];
-      case "bar-stacked-horizontal":
+      case 'bar-stacked-horizontal':
         return [
           {
-            dimName: "groupAxis",
-            dimLabel: "Y - Axis",
+            dimName: 'groupAxis',
+            dimLabel: 'Y - Axis',
             fieldName: undefined,
             usedForUniqueness: true,
             requirements: {
-              fieldTypes: ["miscField", "isoLabelField", "timeField"],
+              fieldTypes: ['miscField', 'isoLabelField', 'timeField'],
               minValues: 1
             },
             possibleFields: []
           },
           {
-            dimName: "xAxis",
-            dimLabel: "Stacks",
+            dimName: 'xAxis',
+            dimLabel: 'Stacks',
             fieldName: undefined,
             usedForUniqueness: true,
             requirements: {
-              fieldTypes: ["miscField", "isoLabelField", "timeField"],
+              fieldTypes: ['miscField', 'isoLabelField', 'timeField'],
               minValues: 2
             },
             possibleFields: []
           },
           {
-            dimName: "yAxis",
-            dimLabel: "X - Axis",
+            dimName: 'yAxis',
+            dimLabel: 'X - Axis',
             usedForUniqueness: false,
             fieldName: undefined,
             requirements: {
-              fieldTypes: ["valueField"],
+              fieldTypes: ['valueField'],
               minValues: 2
             },
             possibleFields: []
           }
         ];
-      case "groupedbarchart":
+      case 'groupedbarchart':
         return [
           {
-            dimName: "groupAxis",
-            dimLabel: "X - Axis",
+            dimName: 'groupAxis',
+            dimLabel: 'X - Axis',
             fieldName: undefined,
             usedForUniqueness: true,
             requirements: {
-              fieldTypes: ["miscField", "isoLabelField", "timeField"],
+              fieldTypes: ['miscField', 'isoLabelField', 'timeField'],
               minValues: 1
             },
             possibleFields: []
           },
           {
-            dimName: "xAxis",
-            dimLabel: "Groups",
+            dimName: 'xAxis',
+            dimLabel: 'Groups',
             fieldName: undefined,
             usedForUniqueness: true,
             requirements: {
-              fieldTypes: ["miscField", "isoLabelField", "timeField"],
+              fieldTypes: ['miscField', 'isoLabelField', 'timeField'],
               minValues: 2
             },
             possibleFields: []
           },
           {
-            dimName: "yAxis",
-            dimLabel: "Y - Axis",
+            dimName: 'yAxis',
+            dimLabel: 'Y - Axis',
             usedForUniqueness: false,
             fieldName: undefined,
             requirements: {
-              fieldTypes: ["valueField"],
+              fieldTypes: ['valueField'],
               minValues: 2
             },
             possibleFields: []
           }
         ];
-      case "bar-grouped-horizontal":
+      case 'bar-grouped-horizontal':
         return [
           {
-            dimName: "groupAxis",
-            dimLabel: "Y - Axis",
+            dimName: 'groupAxis',
+            dimLabel: 'Y - Axis',
             fieldName: undefined,
             usedForUniqueness: true,
             requirements: {
-              fieldTypes: ["miscField", "isoLabelField", "timeField"],
+              fieldTypes: ['miscField', 'isoLabelField', 'timeField'],
               minValues: 1
             },
             possibleFields: []
           },
           {
-            dimName: "xAxis",
-            dimLabel: "Groups",
+            dimName: 'xAxis',
+            dimLabel: 'Groups',
             fieldName: undefined,
             usedForUniqueness: true,
             requirements: {
-              fieldTypes: ["miscField", "isoLabelField", "timeField"],
+              fieldTypes: ['miscField', 'isoLabelField', 'timeField'],
               minValues: 2
             },
             possibleFields: []
           },
           {
-            dimName: "yAxis",
-            dimLabel: "X - Axis",
+            dimName: 'yAxis',
+            dimLabel: 'X - Axis',
             usedForUniqueness: false,
             fieldName: undefined,
             requirements: {
-              fieldTypes: ["valueField"],
+              fieldTypes: ['valueField'],
               minValues: 2
             },
             possibleFields: []
           }
         ];
       default:
-        console.log("[Creator] - Error Dimension type not found ", type);
+        console.log('[Creator] - Error Dimension type not found ', type);
         return null;
     }
   }
@@ -983,35 +828,35 @@ export const getDimensionsWithRequirements = type => {
   if (timeChartTypes.includes(type)) {
     return [
       {
-        dimName: "xAxis",
-        dimLabel: "X - Axis",
+        dimName: 'xAxis',
+        dimLabel: 'X - Axis',
         fieldName: undefined,
         usedForUniqueness: true,
         requirements: {
-          fieldTypes: ["miscField", "isoLabelField", "timeField"],
+          fieldTypes: ['miscField', 'isoLabelField', 'timeField'],
           minValues: 2
         },
         possibleFields: []
       },
       {
-        dimName: "labelAxis",
-        dimLabel: "Series",
+        dimName: 'labelAxis',
+        dimLabel: 'Series',
         fieldName: undefined,
         usedForUniqueness: true,
         requirements: {
-          fieldTypes: ["miscField", "isoLabelField", "timeField"],
+          fieldTypes: ['miscField', 'isoLabelField', 'timeField'],
           minValues: 1
         },
         possibleFields: []
       },
 
       {
-        dimName: "yAxis",
-        dimLabel: "Y - Axis",
+        dimName: 'yAxis',
+        dimLabel: 'Y - Axis',
         usedForUniqueness: false,
         fieldName: undefined,
         requirements: {
-          fieldTypes: ["valueField"],
+          fieldTypes: ['valueField'],
           minValues: 2
         },
         possibleFields: []
@@ -1019,7 +864,7 @@ export const getDimensionsWithRequirements = type => {
     ];
   }
 
-  console.log("No Requirements for type: ", type);
+  console.log('No Requirements for type: ', type);
 };
 
 /**
@@ -1033,10 +878,7 @@ export const getPossibleFieldsForDimension = (dimension, content) => {
   for (const fieldName of allfieldNames) {
     const field = fields[fieldName];
     // console.log("checking for field: ",field);
-    if (
-      dimension.requirements.fieldTypes &&
-      !dimension.requirements.fieldTypes.includes(field.fieldType)
-    ) {
+    if (dimension.requirements.fieldTypes && !dimension.requirements.fieldTypes.includes(field.fieldType)) {
       continue;
     }
     possibleFields.push({
@@ -1079,11 +921,7 @@ export const getTypeSpecificFields = dataSet => {
  * @return              [description]
  */
 
-export const detectDuplicateRows = (
-  localStorageFieldName,
-  fieldNameList,
-  data
-) => {
+export const detectDuplicateRows = (localStorageFieldName, fieldNameList, data) => {
   const startDate = new Date();
   const report = {
     duplicatesFound: false,
@@ -1112,16 +950,16 @@ export const detectDuplicateRows = (
           //push the additional id in the response
           currentMap[index].rowIds.push(row[localStorageFieldName].id);
         } else {
-          let labels = "";
+          let labels = '';
           for (const fieldName of fieldNameList) {
             if (labels.length == 0) {
               if (row[fieldName]) {
                 labels = row[fieldName];
               } else {
-                labels = "";
+                labels = '';
               }
             } else {
-              labels = labels + " " + row[fieldName];
+              labels = labels + ' ' + row[fieldName];
             }
           }
           currentMap.push({
@@ -1159,10 +997,7 @@ export const detectDuplicateRows = (
     report.duplicateRowsList = rowsList;
   }
   const endDate = new Date();
-  console.log(
-    "[Creator] - detect duplicate rows finished: ",
-    endDate - startDate
-  );
+  console.log('[Creator] - detect duplicate rows finished: ', endDate - startDate);
   return report;
 };
 
@@ -1176,12 +1011,7 @@ export const detectDuplicateRows = (
  */
 export const checkUniqueness = (data, fieldNameList, extended = false) => {
   const startDate = new Date();
-  console.log(
-    "checking uniqueness for fields: ",
-    fieldNameList.length,
-    " datarows: ",
-    data.length
-  );
+  console.log('checking uniqueness for fields: ', fieldNameList.length, ' datarows: ', data.length);
   const uniqueStrings = [];
   const linkedHashMap = [];
   // structure of easily querying uniquess:
@@ -1244,12 +1074,12 @@ export const checkUniqueness = (data, fieldNameList, extended = false) => {
       }
     } */
     const endDate = new Date();
-    console.log("[Creator] - uniqueness finished: ", endDate - startDate);
+    console.log('[Creator] - uniqueness finished: ', endDate - startDate);
     return true;
   } else {
     let index = 0;
     for (const row of data) {
-      let checkString = "";
+      let checkString = '';
       for (const fieldName of fieldNameList) {
         checkString = checkString + row[fieldName];
       }
@@ -1273,10 +1103,7 @@ export const checkUniqueness = (data, fieldNameList, extended = false) => {
 };
 
 export const getAllSubsets = theArray => {
-  return theArray.reduce(
-    (subsets, value) => subsets.concat(subsets.map(set => [value, ...set])),
-    [[]]
-  );
+  return theArray.reduce((subsets, value) => subsets.concat(subsets.map(set => [value, ...set])), [[]]);
 };
 
 /**
@@ -1294,9 +1121,9 @@ export const checkDimension = (fields, type) => {
   const allfieldNames = Object.keys(fields)
     .map(el => {
       let order = 0;
-      if (fields[el].fieldType === "isoLabelField") order = 3;
-      if (fields[el].fieldType === "timeField") order = 2;
-      if (fields[el].fieldType === "miscField") order = 1;
+      if (fields[el].fieldType === 'isoLabelField') order = 3;
+      if (fields[el].fieldType === 'timeField') order = 2;
+      if (fields[el].fieldType === 'miscField') order = 1;
       return { fieldName: el, order: order };
     })
     .sort(compareFieldTypeOrder)
@@ -1316,16 +1143,10 @@ export const checkDimension = (fields, type) => {
       for (const fieldName of allfieldNames) {
         const field = fields[fieldName];
         // console.log("checking for field: ",field);
-        if (
-          requirement.dataTypes &&
-          !requirement.dataTypes.includes(field.dataType)
-        ) {
+        if (requirement.dataTypes && !requirement.dataTypes.includes(field.dataType)) {
           continue;
         }
-        if (
-          requirement.fieldTypes &&
-          !requirement.fieldTypes.includes(field.fieldType)
-        ) {
+        if (requirement.fieldTypes && !requirement.fieldTypes.includes(field.fieldType)) {
           continue;
         }
         // TODO min values check but this needs concept in this direction
@@ -1367,7 +1188,7 @@ export const validatedataItSelf = (content, data) => {
   for (const columnName of Object.keys(fields)) {
     const field = fields[columnName];
     switch (field.dataType) {
-      case "string":
+      case 'string':
         data = data.map(row => {
           if (row[field.fieldName]) {
             row[field.fieldName] = row[field.fieldName].toString().trim();
@@ -1377,7 +1198,7 @@ export const validatedataItSelf = (content, data) => {
           return row;
         });
         break;
-      case "number":
+      case 'number':
         data = data.map(row => {
           const floatVal = parseFloat(row[field.fieldName]);
           if (isNaN(floatVal)) {
@@ -1388,14 +1209,14 @@ export const validatedataItSelf = (content, data) => {
           return row;
         });
         break;
-      case "date":
+      case 'date':
         data = data.map(row => {
           row[field.fieldName] = row[field.fieldName].toString().trim();
           return row;
         });
         break;
       default:
-        console.log("ERROR DATA TYPE: ", field.dataType, field);
+        console.log('ERROR DATA TYPE: ', field.dataType, field);
     }
     // delete field.localStorage;
   }

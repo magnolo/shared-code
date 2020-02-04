@@ -25,11 +25,22 @@ const updateEnvironment = config => {
 import uuid from 'uuid/v4';
 // import fetch from 'node-fetch';
 
+import * as constants from './config/constants';
 import * as utilities from './utilities';
 import { getColorScale } from './color/colorScale';
 import * as layout from './content/layout';
 import * as style from './content/style';
 import { validateContent } from './content/validator';
+import { validateTemplate } from './templates/validator';
+import {
+  mergeTemplates,
+  getAmountofSelectedTemplateValues,
+  reduceTemplateValuesToSelected,
+  applyTemplateToContent,
+  applySectionSelectionForChildren,
+  generateNewTemplateAndConfigurationFromContent,
+  generateTemplateConfiguration
+} from './templates/templates';
 import * as dataUtilities from './data/pipeline';
 
 import { ContentSchema } from './schema/content';
@@ -53,5 +64,32 @@ const middleware = { injectPermissions, secureByPermission };
 const schema = { ContentSchema, DataSchema, UserSchema };
 const contentUtilities = { validate: validateContent };
 const colorScale = { getColorScale };
+const templateUtilities = {
+  validateTemplate: validateTemplate,
+  mergeTemplates: mergeTemplates,
+  getAmountofSelectedTemplateValues: getAmountofSelectedTemplateValues,
+  reduceTemplateValuesToSelected: reduceTemplateValuesToSelected,
+  applyTemplateToContent: applyTemplateToContent,
+  applySectionSelectionForChildren: applySectionSelectionForChildren,
+  generateNewTemplateAndConfigurationFromContent: generateNewTemplateAndConfigurationFromContent,
+  generateTemplateConfiguration: generateTemplateConfiguration
+};
 
-export { contentUtilities, dataUtilities, colorScale, schemas, magicExport, environment, updateEnvironment, utilities, layout, style, middleware, schema, PERMISSIONS, ANON_USER };
+export {
+  templateUtilities,
+  contentUtilities,
+  dataUtilities,
+  colorScale,
+  schemas,
+  magicExport,
+  environment,
+  updateEnvironment,
+  constants,
+  utilities,
+  layout,
+  style,
+  middleware,
+  schema,
+  PERMISSIONS,
+  ANON_USER
+};

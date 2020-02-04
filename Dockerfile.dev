@@ -5,7 +5,4 @@ COPY package.json ${APP_PATH}
 COPY yarn.lock ${APP_PATH}
 
 # Install node packages
-RUN yarn --pure-lockfile --ignore-engines
-
-# Copy Codebase
-COPY . ${APP_PATH}
+RUN yarn --pure-lockfile --ignore-engines --unsafe-perm=true --allow-root

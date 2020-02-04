@@ -6,7 +6,7 @@ const BundleAnalyzer = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const browserConfig = {
   target: 'web',
-  mode: 'development',
+  mode: 'production',
   entry: {
     browser: ['./src/browser']
   },
@@ -51,7 +51,7 @@ const browserConfig = {
 
 const nodeConfig = {
   target: 'node',
-  mode: 'development',
+  mode: 'production',
   entry: {
     node: ['./src/node']
   },

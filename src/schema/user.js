@@ -62,10 +62,22 @@ const UserSchema = new Schema(
       type: Date,
       default: null
     },
-    roles: {
-      type: Array,
-      default: []
+    newsletterConsent: {
+      accepted: {
+        type: Boolean,
+        default: false
+      },
+      date: {
+        type: Date,
+        default: null
+      }
     },
+    roles: [
+      {
+        type: String,
+        ref: 'RoleModel'
+      }
+    ],
     verifiedDataProvider: {
       type: Boolean,
       default: false

@@ -74,11 +74,4 @@ const convertFormatToExtendedFormat = (format, extendedFormat) => {
   return format;
 };
 
-export {
-  getFormatObject,
-  getExtendedFormatObject,
-  getFormatShadowObject,
-  getFormatLineHeightObject,
-  getFormatMarginPaddingObject,
-  convertFormatToExtendedFormat
-};
+export { getFormatObject, getExtendedFormatObject, getFormatShadowObject, getFormatLineHeightObject, getFormatMarginPaddingObject, convertFormatToExtendedFormat };

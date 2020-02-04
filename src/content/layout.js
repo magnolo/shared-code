@@ -117,7 +117,8 @@ const validateLayout = (obj, type) => {
       }
     }
   }
-
+  //old layout parts
+  obj.oldLayoutStyle = obj.hasOwnProperty('oldLayoutStyle') ? obj.oldLayoutStyle : true;
   return obj;
 };
 
@@ -179,6 +180,12 @@ const createLayoutObject = (type, label, style = {}) => {
       margin: getFormatMarginPaddingObject(),
       padding: getFormatMarginPaddingObject(),
       boxShadow: getFormatShadowObject(0, 0, 0, 0, 'rgba(0, 0, 0, 0)')
+    });
+  }
+
+  if (type === 'legend') {
+    obj.style = Object.assign(obj.style, {
+      flexGrow: 1
     });
   }
 

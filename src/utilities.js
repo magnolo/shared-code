@@ -2,13 +2,26 @@ import moment from 'moment';
 import getSlug from 'speakingurl';
 import generate from 'nanoid/generate';
 
+import { Base64 } from 'js-base64';
+import { diff, addedDiff, deletedDiff, updatedDiff, detailedDiff } from 'deep-object-diff';
+
+const base64 = Base64;
+
+const objectDiff = {
+  diff,
+  addedDiff,
+  deletedDiff,
+  updatedDiff,
+  detailedDiff
+};
+
 const isArray = obj => typeof obj === 'object' && Array.isArray(obj);
 
 const isObject = obj => typeof obj === 'object' && !Array.isArray(obj) && obj !== null;
 
 const cloneObject = obj => JSON.parse(JSON.stringify(obj));
 
-const unique = array => array.filter((obj, idx, nodes) => nodes.indexOf(obj) === idx);
+const unique = array => Array.from(new Set(array)); // array.filter((obj, idx, nodes) => nodes.indexOf(obj) === idx);
 
 const uniqueSet = array => Array.from(new Set(array)); // [...new Set(array)];
 
@@ -57,9 +70,15 @@ const debounce = (callback, wait, immediate = false) => {
  */
 const objToMoment = (obj, inputFormat, strictCheck = true) => {
   let date = moment.utc(obj, inputFormat, strictCheck);
-  if (inputFormat.toLowerCase().includes('w') && date.week() === 1) {
+  const lowerInputFormat = inputFormat.toLowerCase();
+  if (lowerInputFormat.includes('w') && date.week() === 1) {
     date = date.endOf('week').startOf('day');
   }
+
+  if (!lowerInputFormat.includes('d') && (lowerInputFormat === 'yyyy' || lowerInputFormat.includes('q') || lowerInputFormat.includes('m'))) {
+    date = date.add(1, 'days');
+  }
+
   return date;
 };
 
@@ -130,6 +149,8 @@ const createTagHashSlug = instance => {
 };
 
 export {
+  base64,
+  objectDiff,
   isArray,
   isObject,
   cloneObject,

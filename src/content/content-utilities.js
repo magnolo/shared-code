@@ -69,7 +69,7 @@ const applyDataSetUpdateToExistingContent = (content, options) => {
 const createNewValueFieldFromExisting = (content, oldValueFieldName, newValueFieldName, newValueFieldTitle, newValueFormat) => {
   const { fields, dimensions } = content.typeSpecific;
   // fields
-  fields[newValueFieldName] = deepCloneObject(fields[oldValueFieldName]);
+  fields[newValueFieldName] = cloneObject(fields[oldValueFieldName]);
   fields[newValueFieldName].fieldName = newValueFieldName;
   fields[newValueFieldName].title = newValueFieldTitle;
   fields[newValueFieldName].format = newValueFormat;
