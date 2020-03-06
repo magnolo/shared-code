@@ -17,7 +17,7 @@ setEnv(environment);
 
 const updateEnvironment = config => {
   const { fetch, env } = config;
-  console.log('[updateEnvironment] - In shared-code');
+  console.log('[updateEnvironment] - In shared-code ');
   updateEnv(environment, env);
   setFetch(fetch);
 };
@@ -39,6 +39,11 @@ import {
   generateNewTemplateAndConfigurationFromContent,
   generateTemplateConfiguration
 } from './templates/templates';
+
+//data utilties
+import { countDecimals, convertStringToValueIfPossible, getDecimalPlaces } from './data/utilities';
+//datachecks
+import { testFieldsAsValueField } from './data/fieldchecks';
 
 const magicExport = () => {
   const id = uuid();
@@ -62,4 +67,25 @@ const templateUtilities = {
   generateTemplateConfiguration: generateTemplateConfiguration
 };
 
-export { templateUtilities, contentUtilities, magicExport, environment, updateEnvironment, constants, utilities, layout, style, middleware, PERMISSIONS, ANON_USER };
+const dataUtilities = {
+  countDecimals: countDecimals,
+  convertStringToValueIfPossible: convertStringToValueIfPossible,
+  getDecimalPlaces: getDecimalPlaces,
+  testFieldsAsValueField: testFieldsAsValueField
+};
+
+export {
+  dataUtilities,
+  templateUtilities,
+  contentUtilities,
+  magicExport,
+  environment,
+  updateEnvironment,
+  constants,
+  utilities,
+  layout,
+  style,
+  middleware,
+  PERMISSIONS,
+  ANON_USER
+};

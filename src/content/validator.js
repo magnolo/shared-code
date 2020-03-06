@@ -4,13 +4,20 @@ import { scaleLinear } from 'd3-scale';
 
 import { isObject, cloneObject, unique, roundTo } from '../utilities';
 import { MapTypes, PublicUserIds, AccessLevels } from '../config/constants';
-import { getValueFieldName, getLabelFieldName } from '../data/pipeline';
+import { getValueFieldName, getLabelFieldName, getRightLabelFieldName, getRightLegendFieldName } from '../data/pipeline';
 
 import { getDimensionsWithRequirements } from './creator';
 import { getBaseMetricObect } from './content-utilities';
 
 import { createLayoutObject, getLayoutChildObjects, createAtlasLayout, createVisualLayout, validateLayout } from './layout';
-import { getFormatObject, getExtendedFormatObject, getFormatShadowObject, getFormatLineHeightObject, getFormatMarginPaddingObject, convertFormatToExtendedFormat } from './style';
+import {
+  getFormatObject,
+  getExtendedFormatObject,
+  getFormatShadowObject,
+  getFormatLineHeightObject,
+  getFormatMarginPaddingObject,
+  convertFormatToExtendedFormat
+} from './style';
 
 const styleReducer = (accumulator, obj) => {
   if (isObject(obj) && 'fontFamily' in obj && 'color' in obj) accumulator.push(obj);
@@ -217,7 +224,16 @@ export const validateContent = content => {
     }
 
     const { type, typeSpecific } = content;
-    const noTimeChartTypes = ['donutchart', 'donutchart_half', 'barchart', 'horizontalbarchart', 'groupedbarchart', 'stackedbarchart', 'bar-grouped-horizontal', 'bar-stacked-horizontal'];
+    const noTimeChartTypes = [
+      'donutchart',
+      'donutchart_half',
+      'barchart',
+      'horizontalbarchart',
+      'groupedbarchart',
+      'stackedbarchart',
+      'bar-grouped-horizontal',
+      'bar-stacked-horizontal'
+    ];
     const chartTypes = [...noTimeChartTypes, 'areachart', 'linechart'];
     const mapTypes = MapTypes;
     const visualTypes = [...chartTypes, ...mapTypes];
@@ -679,7 +695,9 @@ export const validateContent = content => {
         undefined,
         undefined,
         undefined,
-        content.type === 'report' ? getFormatMarginPaddingObject(0, 'em', 5, 'px', 0, 'em', 5, 'px') : getFormatMarginPaddingObject(5, 'px', 5, 'px', 5, 'px', 5, 'px')
+        content.type === 'report'
+          ? getFormatMarginPaddingObject(0, 'em', 5, 'px', 0, 'em', 5, 'px')
+          : getFormatMarginPaddingObject(5, 'px', 5, 'px', 5, 'px', 5, 'px')
       );
 
       const extendedSubTitleFormatObject = getExtendedFormatObject(
@@ -689,7 +707,9 @@ export const validateContent = content => {
         content.type === 'report' ? '#ffffff' : '#000000',
         undefined,
         undefined,
-        content.type === 'report' ? getFormatMarginPaddingObject(1.2, 'em', 0, 'px', 0.3996, 'em', 0, 'px') : getFormatMarginPaddingObject(0, 'px', 5, 'px', 5, 'px', 5, 'px')
+        content.type === 'report'
+          ? getFormatMarginPaddingObject(1.2, 'em', 0, 'px', 0.3996, 'em', 0, 'px')
+          : getFormatMarginPaddingObject(0, 'px', 5, 'px', 5, 'px', 5, 'px')
       );
 
       const extendedDescriptionFormatObject = getExtendedFormatObject(
@@ -700,7 +720,9 @@ export const validateContent = content => {
         undefined,
         undefined,
         undefined,
-        content.type === 'report' ? getFormatMarginPaddingObject(1, 'em', 5, 'px', 0.333, 'em', 5, 'px') : getFormatMarginPaddingObject(5, 'px', 0, 'px', 0, 'px', 0, 'px')
+        content.type === 'report'
+          ? getFormatMarginPaddingObject(1, 'em', 5, 'px', 0.333, 'em', 5, 'px')
+          : getFormatMarginPaddingObject(5, 'px', 0, 'px', 0, 'px', 0, 'px')
       );
 
       // TODO depending on type we should set good defaults so that our old style is met!
@@ -723,7 +745,8 @@ export const validateContent = content => {
 
       if (typeSpecific.tooltip) {
         typeSpecific.tooltip.titleStyle =
-          typeSpecific.tooltip.titleStyle || getExtendedFormatObject(16, 500, undefined, undefined, undefined, undefined, getFormatMarginPaddingObject(0, undefined, 0, undefined, 5, 'px'));
+          typeSpecific.tooltip.titleStyle ||
+          getExtendedFormatObject(16, 500, undefined, undefined, undefined, undefined, getFormatMarginPaddingObject(0, undefined, 0, undefined, 5, 'px'));
         typeSpecific.tooltip.valueStyle = typeSpecific.tooltip.valueStyle || getExtendedFormatObject(20, 300);
         typeSpecific.tooltip.contentStyle = typeSpecific.tooltip.contentStyle || getExtendedFormatObject();
       }
@@ -731,7 +754,8 @@ export const validateContent = content => {
       // chart legend
       if (typeSpecific.chart && typeSpecific.chart.legend) {
         const margin = getFormatMarginPaddingObject(10, 'px', 10, 'px', 10, 'px', 10, 'px');
-        typeSpecific.chart.legend.style = typeSpecific.chart.legend.style || getExtendedFormatObject(11, undefined, undefined, undefined, undefined, undefined, undefined, margin);
+        typeSpecific.chart.legend.style =
+          typeSpecific.chart.legend.style || getExtendedFormatObject(11, undefined, undefined, undefined, undefined, undefined, undefined, margin);
       }
 
       // chart values
@@ -769,7 +793,8 @@ export const validateContent = content => {
       if (content.type === 'report') {
         typeSpecific.report.visualDescriptionTitle = typeSpecific.report.visualDescriptionTitle || getExtendedFormatObject(16, 500, undefined, '#ffffff');
         typeSpecific.report.visualDescription =
-          typeSpecific.report.visualDescription || getExtendedFormatObject(13, 300, undefined, '#ffffff', undefined, undefined, undefined, getFormatMarginPaddingObject(10, 'px'));
+          typeSpecific.report.visualDescription ||
+          getExtendedFormatObject(13, 300, undefined, '#ffffff', undefined, undefined, undefined, getFormatMarginPaddingObject(10, 'px'));
       }
 
       typeSpecific.version = 6;
@@ -1151,7 +1176,8 @@ export const validateContent = content => {
     if (typeSpecific.version < 17) {
       if (visualTypes.includes(type) && typeSpecific.chart) {
         const padding = getFormatMarginPaddingObject(10, 'px', 10, 'px', 10, 'px', 10, 'px');
-        typeSpecific.chart.style = typeSpecific.chart.style || getExtendedFormatObject(undefined, undefined, undefined, undefined, undefined, undefined, padding);
+        typeSpecific.chart.style =
+          typeSpecific.chart.style || getExtendedFormatObject(undefined, undefined, undefined, undefined, undefined, undefined, padding);
       }
 
       typeSpecific.version = 17;
@@ -1462,7 +1488,9 @@ export const validateContent = content => {
           font: getExtendedFormatObject(9, undefined, undefined, '#000000', undefined, undefined, undefined, attributionMargin)
         };
 
-        typeSpecific.map.legend.showOnlyOccurrences = typeSpecific.map.legend.hasOwnProperty('showOnlyOccurrences') ? typeSpecific.map.legend.showOnlyOccurrences : false;
+        typeSpecific.map.legend.showOnlyOccurrences = typeSpecific.map.legend.hasOwnProperty('showOnlyOccurrences')
+          ? typeSpecific.map.legend.showOnlyOccurrences
+          : false;
       }
 
       if (visualTypes.includes(type)) {
@@ -1552,7 +1580,9 @@ export const validateContent = content => {
     // App Push 09.10.2019
     if (typeSpecific.version < 27) {
       if (visualTypes.includes(type) && typeSpecific.map) {
-        typeSpecific.map.options.renderWorldCopies = typeSpecific.map.options.hasOwnProperty('renderWorldCopies') ? typeSpecific.map.options.renderWorldCopies : true;
+        typeSpecific.map.options.renderWorldCopies = typeSpecific.map.options.hasOwnProperty('renderWorldCopies')
+          ? typeSpecific.map.options.renderWorldCopies
+          : true;
       }
 
       typeSpecific.version = 27;
@@ -1571,7 +1601,12 @@ export const validateContent = content => {
 
       // advanced tooltip classic mobile TODO add to template validator
       if (visualTypes.includes(type)) {
-        if (typeSpecific.advancedTooltip && typeSpecific.advancedTooltip.style && typeSpecific.advancedTooltip.style.classic && typeSpecific.advancedTooltip.style.classic.maxHeight) {
+        if (
+          typeSpecific.advancedTooltip &&
+          typeSpecific.advancedTooltip.style &&
+          typeSpecific.advancedTooltip.style.classic &&
+          typeSpecific.advancedTooltip.style.classic.maxHeight
+        ) {
           const mobileHeightValue = typeSpecific.advancedTooltip.style.classic.maxHeight.mobile.value;
           const desktopHeightValue = typeSpecific.advancedTooltip.style.classic.maxHeight.desktop.value;
 
@@ -1640,7 +1675,9 @@ export const validateContent = content => {
           }
 
           typeSpecific.map.options.maxViewport = typeSpecific.map.options.maxViewport || options.maxBounds || [[-180, -85], [180, 85]];
-          typeSpecific.map.options.maxViewportIsLimit = typeSpecific.map.options.hasOwnProperty('maxViewportIsLimit') ? typeSpecific.map.options.maxViewportIsLimit : !!options.maxBounds;
+          typeSpecific.map.options.maxViewportIsLimit = typeSpecific.map.options.hasOwnProperty('maxViewportIsLimit')
+            ? typeSpecific.map.options.maxViewportIsLimit
+            : !!options.maxBounds;
 
           if (!!typeSpecific.map.options.fitBounds) delete typeSpecific.map.options.fitBounds;
           if (!!typeSpecific.map.options.flyTo) delete typeSpecific.map.options.flyTo;
@@ -1790,7 +1827,9 @@ export const validateContent = content => {
           typeSpecific.style.inVisualFilter.font.padding = getFormatMarginPaddingObject(5, undefined, 10, undefined, 5, undefined, 10);
         }
 
-        typeSpecific.style.inVisualFilter.borderRadius = typeSpecific.style.inVisualFilter.hasOwnProperty('borderRadius') ? typeSpecific.style.inVisualFilter.borderRadius : 100;
+        typeSpecific.style.inVisualFilter.borderRadius = typeSpecific.style.inVisualFilter.hasOwnProperty('borderRadius')
+          ? typeSpecific.style.inVisualFilter.borderRadius
+          : 100;
       }
 
       typeSpecific.version = 31;
@@ -1865,7 +1904,7 @@ export const validateContent = content => {
       typeSpecific.version = 33;
     }
 
-    // No App Push Yet
+    // App Push 05.02.2020
     if (typeSpecific.version < 34) {
       if (visualTypes.includes(type)) {
         // fix map style source to point to new style service
@@ -1888,6 +1927,136 @@ export const validateContent = content => {
           }
         }
       }
+
+      typeSpecific.version = 34;
+    }
+
+    // App Push 19.02.2020
+    if (typeSpecific.version < 35) {
+      if (visualTypes.includes(type)) {
+        const { legend, values } = typeSpecific.chart;
+        if (!values.hasOwnProperty('forceDraw')) {
+          values.forceDraw = false;
+
+          values.style.margin.top = 0.5;
+          values.style.margin.topUnit = 'em';
+          values.style.margin.right = 0;
+          values.style.margin.rightUnit = 'em';
+          values.style.margin.bottom = 0.5;
+          values.style.margin.bottomUnit = 'em';
+          values.style.margin.left = 0;
+          values.style.margin.leftUnit = 'em';
+        }
+
+        const { labelAxis, valueAxis } = typeSpecific.chart.axis;
+        if (!labelAxis.hasOwnProperty('autoLines')) {
+          labelAxis.valueStyle.position = 'right';
+          labelAxis.valueStyle.lineheight.value = 1;
+          labelAxis.valueStyle.lineheight.unit = 'em';
+
+          labelAxis.autoLines = true;
+          labelAxis.maxLines = 0;
+          labelAxis.autoRotation = true;
+          labelAxis.minRotation = -1;
+          labelAxis.placementMode = 'rotate'; // auto rotate offset
+
+          labelAxis.lineBreakFactor = 3.2;
+          labelAxis.numLabels = 5;
+        }
+
+        if (!valueAxis.hasOwnProperty('autoLines')) {
+          valueAxis.valueStyle.position = 'right';
+          valueAxis.valueStyle.lineheight.value = 1;
+          valueAxis.valueStyle.lineheight.unit = 'em';
+
+          valueAxis.autoLines = true;
+          valueAxis.maxLines = 0;
+          valueAxis.autoRotation = true;
+          valueAxis.minRotation = -1;
+          valueAxis.placementMode = 'rotate'; // auto rotate offset
+
+          valueAxis.lineBreakFactor = 3.2;
+          valueAxis.numValues = 5;
+        }
+
+        const rightLabelFieldName = getRightLabelFieldName(content);
+        const rightLegendFieldName = getRightLegendFieldName(content);
+
+        const rightLabelField = typeSpecific.fields[rightLabelFieldName];
+        const rightLegendField = typeSpecific.fields[rightLegendFieldName];
+
+        if (labelAxis.format.formatType !== rightLabelField.format.formatType) {
+          labelAxis.format = cloneObject(rightLabelField.format);
+        }
+
+        if (legend.format.formatType !== rightLegendField.format.formatType) {
+          labelAxis.format = cloneObject(rightLegendField.format);
+        }
+      }
+
+      typeSpecific.version = 35;
+    }
+
+    // App push 04.03.2020
+    if (typeSpecific.version < 36) {
+      if (visualTypes.includes(type)) {
+        const { legend } = typeSpecific.chart;
+        legend.fontScale = legend.hasOwnProperty('fontScale') ? legend.fontScale : 0.5;
+      }
+
+      /**
+       * Adding Background, BorderRadius to legend title and body
+       * and border for color boxes
+       *  */
+      if (visualTypes.includes(type) && typeSpecific.map) {
+        const { legend } = typeSpecific.map;
+
+        // Add border radius to map legend header and body
+        legend.values.borderRadius = legend.values.hasOwnProperty('borderRadius') ? legend.values.borderRadius : 2;
+        legend.title.borderRadius = legend.title.hasOwnProperty('borderRadius') ? legend.title.borderRadius : 2;
+
+        // Add background to map legend header and body
+        legend.values.background = legend.values.background || {
+          backgroundColor: 'rgba(255, 255, 255, 0.93)'
+        };
+        legend.title.background = legend.title.background || {
+          backgroundColor: 'rgba(255, 255, 255, 0.93)'
+        };
+
+        legend.values.shadow = legend.values.shadow || {
+          x: 0,
+          y: 2,
+          blur: 12,
+          spread: 0,
+          color: 'rgba(0, 0, 0, 0.15)'
+        };
+        legend.title.shadow = legend.title.shadow || {
+          x: 0,
+          y: 2,
+          blur: 12,
+          spread: 0,
+          color: 'rgba(0, 0, 0, 0.15)'
+        };
+
+        // Add custom style to color boxes in map legend
+        legend.colorBoxes = legend.colorBoxes || {
+          border: {
+            size: {
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: 0
+            },
+            color: 'transparent',
+            type: 'none'
+          }
+        };
+      }
+      typeSpecific.version = 36;
+    }
+
+    //NO APP PUSH YET
+    if (typeSpecific.version < 37) {
     }
 
     if (content) {
@@ -1909,7 +2078,8 @@ export const validateContent = content => {
 
         obj.weight = String(obj.weight);
       }
-      // ALWAYS VALIDATE LAYOUT YES
+
+      // ALWAYS VALIDATE LAYOUT
       if (visualTypes.includes(type) || type === 'atlas') {
         let layoutType = 'error';
         if (type === 'atlas') layoutType = 'atlas';

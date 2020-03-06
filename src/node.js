@@ -17,7 +17,7 @@ setEnv(environment);
 
 const updateEnvironment = config => {
   const { fetch, env } = config;
-  console.log('[updateEnvironment] - In shared-code');
+  console.log('[updateEnvironment] - In shared-code ');
   updateEnv(environment, env);
   setFetch(fetch);
 };
@@ -42,6 +42,7 @@ import {
   generateTemplateConfiguration
 } from './templates/templates';
 import * as dataUtilities from './data/pipeline';
+import { snitch } from './utilities/bots';
 
 import { ContentSchema } from './schema/content';
 import { DataSchema } from './schema/data';
@@ -74,8 +75,10 @@ const templateUtilities = {
   generateNewTemplateAndConfigurationFromContent: generateNewTemplateAndConfigurationFromContent,
   generateTemplateConfiguration: generateTemplateConfiguration
 };
+const bots = { snitch };
 
 export {
+  bots,
   templateUtilities,
   contentUtilities,
   dataUtilities,

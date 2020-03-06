@@ -38,6 +38,8 @@ const groupBy = (array, key) => {
 
 const flatten = array => array.reduce((acc, obj) => acc.concat(Array.isArray(obj) ? flatten(obj) : obj), []);
 
+const clamp = (num, min, max) => Math.min(Math.max(min, num), max);
+
 const roundTo = (num, digits = 2) => Math.round(num * Math.pow(10, digits)) / Math.pow(10, digits);
 
 const debounce = (callback, wait, immediate = false) => {
@@ -75,7 +77,10 @@ const objToMoment = (obj, inputFormat, strictCheck = true) => {
     date = date.endOf('week').startOf('day');
   }
 
-  if (!lowerInputFormat.includes('d') && (lowerInputFormat === 'yyyy' || lowerInputFormat.includes('q') || lowerInputFormat.includes('m'))) {
+  const isHourDay = lowerInputFormat === 'hh:mm' || lowerInputFormat.includes('d');
+  const isYearQuarterMonth = lowerInputFormat === 'yyyy' || lowerInputFormat.includes('q') || lowerInputFormat.includes('m');
+
+  if (!isHourDay && isYearQuarterMonth) {
     date = date.add(1, 'days');
   }
 
@@ -160,6 +165,7 @@ export {
   sleepWith,
   groupBy,
   flatten,
+  clamp,
   roundTo,
   debounce,
   objToMoment,

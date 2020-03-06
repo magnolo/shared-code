@@ -95,12 +95,17 @@ const ContentSchema = new Schema(
         isChild: {
           type: Boolean,
           index: true
+        },
+        dataId: {
+          type: String,
+          index: true
         }
       }
     },
     created_at: {
       type: Date,
-      default: Date.now
+      default: Date.now,
+      index: true
     },
     updated_at: {
       type: Date,
@@ -109,7 +114,8 @@ const ContentSchema = new Schema(
     },
     deleted_at: {
       type: Date,
-      default: null
+      default: null,
+      index: true
     },
     flag_language: String,
     searchIndex: {
@@ -184,15 +190,41 @@ ContentSchema.index({ name: 1 }, { collation: { locale: 'de', strength: 1 } });
 //Indexes for faster search improvement 1 asc, -1 desc
 //my visuals
 
-ContentSchema.index({ userId: -1, deleted_at: 1, 'versioning.latest': -1, created_at: -1, 'typeSpecific.isChild': 1, type: 1 }, { name: 'myvisualscreatedidx' });
+ContentSchema.index(
+  { userId: -1, deleted_at: 1, 'versioning.latest': -1, created_at: -1, 'typeSpecific.isChild': 1, type: 1 },
+  { name: 'myvisualscreatedidx' }
+);
 ContentSchema.index({ userId: -1, deleted_at: 1, 'versioning.latest': -1, updated_at: -1, 'typeSpecific.isChild': 1, type: 1 }, { name: 'myvisualsidx' });
-ContentSchema.index({ userId: -1, deleted_at: 1, 'versioning.latest': -1, 'metrics.impressions': -1, 'typeSpecific.isChild': 1, type: 1 }, { name: 'myvisualsimpidx' });
+ContentSchema.index(
+  { userId: -1, deleted_at: 1, 'versioning.latest': -1, 'metrics.impressions': -1, 'typeSpecific.isChild': 1, type: 1 },
+  { name: 'myvisualsimpidx' }
+);
 //public visuals
 ContentSchema.index({ access: -1, deleted_at: 1, 'versioning.latest': -1, updated_at: -1, 'typeSpecific.isChild': 1, type: 1 }, { name: 'publixvisualsidx' });
-ContentSchema.index({ access: -1, deleted_at: 1, 'versioning.latest': -1, 'metrics.impressions': -1, 'typeSpecific.isChild': 1, type: 1 }, { name: 'publixvisualsimpidx' });
+ContentSchema.index(
+  { access: -1, deleted_at: 1, 'versioning.latest': -1, 'metrics.impressions': -1, 'typeSpecific.isChild': 1, type: 1 },
+  { name: 'publixvisualsimpidx' }
+);
 //from my data
-ContentSchema.index({ access: -1, dataSetOwnerId: -1, deleted_at: 1, 'metrics.impressions': -1, 'versioning.latest': -1, 'typeSpecific.isChild': 1, userId: -1 }, { name: 'frommydataimpidx' });
-ContentSchema.index({ access: -1, dataSetOwnerId: -1, deleted_at: 1, updated_at: -1, 'versioning.latest': -1, 'typeSpecific.isChild': 1, userId: -1 }, { name: 'frommydataidx' });
+ContentSchema.index(
+  { access: -1, dataSetOwnerId: -1, deleted_at: 1, 'metrics.impressions': -1, 'versioning.latest': -1, 'typeSpecific.isChild': 1, userId: -1 },
+  { name: 'frommydataimpidx' }
+);
+ContentSchema.index(
+  { access: -1, dataSetOwnerId: -1, deleted_at: 1, updated_at: -1, 'versioning.latest': -1, 'typeSpecific.isChild': 1, userId: -1 },
+  { name: 'frommydataidx' }
+);
+
+//content integrity
+ContentSchema.index(
+  {
+    deleted_at: 1,
+    'versioning.latest': -1,
+    'typeSpecific.isChild': 1,
+    type: 1
+  },
+  { name: 'contentintegrity' }
+);
 
 ContentSchema.pre('save', async function(next) {
   try {

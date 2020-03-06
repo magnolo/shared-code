@@ -1,3 +1,13 @@
+/**
+ *
+ *
+ *   WARNING WARNING WARNING
+ *   TODO
+ *    need to chekc if this is really the structure we want and
+ *    where this is used?
+ *
+ */
+
 const uniqueInVisualFilterTypes = ['valueSelector'];
 
 import { cloneObject, unique } from '../utilities';

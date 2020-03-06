@@ -1,9 +1,26 @@
+/**
+ *
+ *
+ *   WARNING WARNING WARNING
+ *   TODO
+ *    need to chekc if this is really the structure we want and
+ *    where this is used?
+ *
+ */
+
 import { extent } from 'd3-array';
 import orderBy from 'lodash/orderBy';
 
 import { MapTypes } from '../config/constants';
 import { cloneObject, unique, objToMoment, momentToStr } from '../utilities';
 import { setNewValueField, createNewValueFieldFromExisting } from '../content/content-utilities';
+
+/*
+  @author Erich Heil
+
+  Transform ( Clean, Format, Sort, Restructure)
+  Data according to Content Type Specific
+ */
 
 /**
  * used by Chart Manager doesnt deal with choros!
@@ -42,18 +59,19 @@ const getOldFields = content => {
   }
 };
 
-//TODO only allows one time Field atm!
+// TODO REMOVE ASAP!
 const getTimeFieldName = content => {
   for (const fieldName of Object.keys(content.typeSpecific.fields)) {
     const curField = content.typeSpecific.fields[fieldName];
     if (curField.dataType === 'date') {
-      //this is in Isofield
+      //  this is in Isofield
       return curField.fieldName;
     }
   }
   return null;
 };
-//TODO only allows one valueField
+
+// TODO REMOVE ASAP!
 const getValueFieldName = content => {
   for (const dimension of content.typeSpecific.dimensions) {
     if (dimension.requirements.fieldTypes.includes('valueField')) {
@@ -63,18 +81,71 @@ const getValueFieldName = content => {
   return null;
 };
 
-//TODO only allows one Isofield
+// TODO REMOVE ASAP!
 const getIsoFieldName = content => {
   for (const fieldName of Object.keys(content.typeSpecific.fields)) {
     const curField = content.typeSpecific.fields[fieldName];
     if (curField.isoLabelField) {
-      //this is in Isofield
+      //  this is in Isofield
       return curField.fieldName;
     }
   }
   return null;
 };
 
+// CORRECT
+const getRightLegendFieldName = content => {
+  const { type, typeSpecific } = content;
+  const { dimensions } = typeSpecific;
+
+  if (['barchart', 'horizontalbarchart', 'donutchart', 'donutchart_half'].includes(type)) {
+    return dimensions.find(obj => obj.dimName === 'xAxis').fieldName;
+  }
+
+  if (['areachart', 'linechart'].includes(type)) {
+    return dimensions.find(obj => obj.dimName === 'labelAxis').fieldName;
+  }
+
+  if (['groupedbarchart', 'stackedbarchart', 'bar-grouped-horizontal', 'bar-stacked-horizontal'].includes(type)) {
+    return dimensions.find(obj => obj.dimName === 'xAxis').fieldName;
+  }
+
+  if (['choropleth'].includes(type)) {
+    //  can be anything
+    return dimensions.find(obj => obj.dimName === 'iso').fieldName;
+  }
+};
+
+// CORRECT
+const getRightLabelFieldName = content => {
+  const { type, typeSpecific } = content;
+  const { dimensions } = typeSpecific;
+
+  if (['barchart', 'horizontalbarchart', 'donutchart', 'donutchart_half'].includes(type)) {
+    return dimensions.find(obj => obj.dimName === 'xAxis').fieldName;
+  }
+
+  if (['groupedbarchart', 'stackedbarchart', 'bar-grouped-horizontal', 'bar-stacked-horizontal'].includes(type)) {
+    return dimensions.find(obj => obj.dimName === 'groupAxis').fieldName;
+  }
+
+  if (['areachart', 'linechart'].includes(type)) {
+    return dimensions.find(obj => obj.dimName === 'xAxis').fieldName;
+  }
+
+  if (['choropleth'].includes(type)) {
+    //  can be anything
+    return dimensions.find(obj => obj.dimName === 'iso').fieldName;
+  }
+  return null;
+};
+
+/**
+ * TODO this function is inheritely FALSE
+ * this is also used serverside for stub generation
+ * THANK god in the fucking name STUB doesnt create grouped or stacked
+ * but it is used nearly everywhere
+ */
 const getLabelFieldName = content => {
   const { type, typeSpecific } = content;
   const { dimensions } = typeSpecific;
@@ -91,7 +162,7 @@ const getLabelFieldName = content => {
     return dimensions.find(obj => obj.dimName === 'labelAxis').fieldName;
   }
   if (['choropleth'].includes(type)) {
-    //can be anything
+    //  can be anything
     return typeSpecific.data.labelField;
   }
   return null;
@@ -106,12 +177,12 @@ const getLabelFieldName = content => {
 
 const applyInVisualFilter = (content, data, recalc = true) => {
   const { inVisualFilter } = content.typeSpecific;
-  //console.log("[DataPipeline Applying InvisualFilter] - ",inVisualFilter)
-  //inVisualFilter.sort(sortByExecuteFirst);
+  //  console.log("[DataPipeline Applying InvisualFilter] - ",inVisualFilter)
+  //  inVisualFilter.sort(sortByExecuteFirst);
   for (const filter of inVisualFilter) {
     switch (filter.type) {
       case 'valueSelector': {
-        //console.log('CALLING SMART FUNCTIONS', content.typeSpecific, inVisualFilter);
+        //  console.log('CALLING SMART FUNCTIONS', content.typeSpecific, inVisualFilter);
         const ret = applyValueSelectorInVisualFilter(content, data, filter, recalc);
         data = ret.data;
         content = ret.content;
@@ -126,7 +197,7 @@ const applyInVisualFilter = (content, data, recalc = true) => {
       default:
         console.error('smartFunction Error no implementation for: ', filter, data, content);
     }
-    //console.log("[DataPipeline After InvisualFilter] - ",filter)
+    //  console.log("[DataPipeline After InvisualFilter] - ",filter)
   }
 
   return { content: content, data: data };
@@ -138,38 +209,38 @@ const applymultiValueSelectorInVisualFilter = (content, data, filter, recalc) =>
 
   if (!filter.localStorage) filter.localStorage = {};
 
-  //if localStorage defined and has a value -> use this
+  //  if localStorage defined and has a value -> use this
   const { format } = content.typeSpecific.fields[fieldName];
-  //console.log("Updating sorted Values",format, filter);
+  //  console.log("Updating sorted Values",format, filter);
   if (format.formatType === 'string' || format.formatType === 'number') {
     const uniqueValues = unique(data.map(obj => obj[fieldName]));
     const sortedValues = orderBy(uniqueValues, [], sort);
-    //console.log("Updating sorted Values",sortedValues, filter);
+    //  console.log("Updating sorted Values",sortedValues, filter);
     filter.localStorage.filterValues = sortedValues;
   }
 
   if (format.formatType === 'date') {
     const uniqueValues = unique(data.map(obj => obj[fieldName]));
     const dateValues = uniqueValues.map(obj => {
-      let date = objToMoment(obj, format.date.inputFormat);
+      const date = objToMoment(obj, format.date.inputFormat);
       return date;
     });
 
     const sortedValues = orderBy(dateValues, [], sort);
-    //console.log("Updating sorted Values",sortedValues, filter);
+    //  console.log("Updating sorted Values",sortedValues, filter);
     filter.localStorage.filterValues = sortedValues.map(obj => momentToStr(obj, format.date.inputFormat));
     // console.log('After InVisualFilter Value Selector: ', filter);
   }
 
   if (recalc) {
-    //check our options for recalc
+    //  check our options for recalc
     if (filter.options.saveState == 'allSelected') {
       filter.selectedValues = [];
     }
-    //do nothing if it is user selected
+    //  do nothing if it is user selected
   }
 
-  //check that our selected values are still possible
+  //  check that our selected values are still possible
   if (filter.selectedValues.length > 0) {
     const possibleSelectedValues = [];
     for (let i = 0; i < filter.selectedValues.length; i++) {
@@ -190,27 +261,27 @@ const applyValueSelectorInVisualFilter = (content, data, filter, recalc) => {
   const { sort } = options;
 
   if (!filter.localStorage) filter.localStorage = {};
-  //if localStorage defined and has a value -> use this
+  //  if localStorage defined and has a value -> use this
   const { format } = content.typeSpecific.fields[fieldName];
-  //console.log("Updating sorted Values",format, filter);
+  //  console.log("Updating sorted Values",format, filter);
   if (format.formatType === 'string') {
     const uniqueValues = unique(data.map(obj => obj[fieldName]));
     const sortedValues = orderBy(uniqueValues, [], sort);
-    //console.log("Updating sorted Values",sortedValues, filter);
+    //  console.log("Updating sorted Values",sortedValues, filter);
     filter.localStorage.filterValues = sortedValues;
   }
   if (format.formatType === 'date') {
     const uniqueValues = unique(data.map(obj => obj[fieldName]));
     const dateValues = uniqueValues.map(obj => {
-      let date = objToMoment(obj, format.date.inputFormat);
+      const date = objToMoment(obj, format.date.inputFormat);
       return date;
     });
 
     const sortedValues = orderBy(dateValues, [], sort);
-    //console.log("Updating sorted Values",sortedValues, filter);
+    //  console.log("Updating sorted Values",sortedValues, filter);
     filter.localStorage.filterValues = sortedValues.map(obj => momentToStr(obj, format.date.inputFormat));
   }
-  //lets see if we need to recalc
+  //  lets see if we need to recalc
   if (recalc) {
     if (filter.options.saveState == 'last') {
       filter.selectedValue = filter.localStorage.filterValues[filter.localStorage.filterValues.length - 1];
@@ -218,10 +289,10 @@ const applyValueSelectorInVisualFilter = (content, data, filter, recalc) => {
     if (filter.options.saveState == 'first') {
       filter.selectedValue = filter.localStorage.filterValues[0];
     }
-    //do nothing if it is user selected
+    //  do nothing if it is user selected
   }
 
-  //lets check if the selectedValue is still possible
+  //  lets check if the selectedValue is still possible
   if (!filter.selectedValue || !filter.localStorage.filterValues.includes(filter.selectedValue)) {
     if (filter.options.saveState == 'last') {
       filter.selectedValue = filter.localStorage.filterValues[filter.localStorage.filterValues.length - 1];
@@ -229,16 +300,16 @@ const applyValueSelectorInVisualFilter = (content, data, filter, recalc) => {
     if (filter.options.saveState == 'first') {
       filter.selectedValue = filter.localStorage.filterValues[0];
     }
-    //on user defined we still need to set something if its not set
+    //  on user defined we still need to set something if its not set
     if (filter.options.saveState == 'userSelected') {
       filter.selectedValue = filter.localStorage.filterValues[filter.localStorage.filterValues.length - 1];
     }
   }
 
-  //console.log("[DataPipeline] - Selected Value :",filter.selectedValue);
-  //if(filter.selectedValue) {
+  //  console.log("[DataPipeline] - Selected Value :",filter.selectedValue);
+  //  if(filter.selectedValue) {
   data = data.filter(obj => obj[fieldName] === filter.selectedValue);
-  //}
+  //  }
   return { data, content };
 };
 
@@ -256,7 +327,7 @@ const applyEditorFilter = (content, data) => {
   return { data: data, content: content };
 };
 
-//TODO if we have better datastructure we dont need this
+//  TODO if we have better datastructure we dont need this
 const addMetaInfo = (content, data) => {
   const timeField = getTimeFieldName(content);
   for (const [idx, obj] of Object.entries(data)) {
@@ -295,7 +366,7 @@ const clearNulls = (content, data) => {
 
 const getValueRange = (content, data) => {
   const { valueField } = content.typeSpecific.data;
-  //special case for choros cause those damn suckers can have fields where iso is not the right one
+  //  special case for choros cause those damn suckers can have fields where iso is not the right one
   if (content.type == 'choropleth') {
     const isoFieldname = getIsoFieldName(content);
     const extendData = data.filter(el => el[isoFieldname] != null);
@@ -316,7 +387,7 @@ const getValueRange = (content, data) => {
 const sortByContent = (content, data) => {
   const { type, typeSpecific } = content;
   if (!typeSpecific.chart) return { data: data, content: content };
-
+  // console.log("[SortByContent]");
   const { sorting } = content.typeSpecific.chart;
   if (sorting && sorting.enabled) {
     const sortFields = sorting.sortFields;
@@ -376,10 +447,10 @@ const applySmartFunctions = (content, data) => {
     return { data: data, content: content };
   }
   for (const smartFunction of content.typeSpecific.smartFunctions) {
-    //implementing smart Filter parts
+    //  implementing smart Filter parts
     switch (smartFunction.name) {
       case 'timeChange': {
-        //console.log('CALLING SMART FUNCTIONS', content.typeSpecific, smartFunction);
+        //  console.log('CALLING SMART FUNCTIONS', content.typeSpecific, smartFunction);
         const ret = applyTimeChangeSmartFunction(data, content, smartFunction);
         data = ret.data;
         content = ret.content;
@@ -389,7 +460,7 @@ const applySmartFunctions = (content, data) => {
         const ret = applySelectStepsSmartFunction(data, content, smartFunction);
         data = ret.data;
         content = ret.content;
-        //todo what about content?
+        //  todo what about content?
         break;
       }
       case 'singleFieldCalculate': {
@@ -410,12 +481,12 @@ const applySmartFunctions = (content, data) => {
  */
 const applySingleFieldCalculate = (content, data, smartFunction) => {
   if (!smartFunction.parameters.error) {
-    //lets calculate
+    //  lets calculate
     const fieldName = smartFunction.parameters.fieldName;
-    //console.log("[DataPipeline] - input data first value",data[0][fieldName]);
+    //  console.log("[DataPipeline] - input data first value",data[0][fieldName]);
     const functionValue = parseFloat(smartFunction.parameters.functionValue);
     if (!isNaN(functionValue)) {
-      //console.log("[DataPipeline] - applying singleFieldCalculate",fieldName, " value: ",functionValue);
+      //  console.log("[DataPipeline] - applying singleFieldCalculate",fieldName, " value: ",functionValue);
       data = data.map(row => {
         const hasValue = !isNaN(parseFloat(row[fieldName]));
         if (hasValue) {
@@ -441,7 +512,7 @@ const applySingleFieldCalculate = (content, data, smartFunction) => {
       });
     }
   } else {
-    //console.log("[DataPipeline] - smartFunction with Error: ",smartFunction);
+    //  console.log("[DataPipeline] - smartFunction with Error: ",smartFunction);
   }
   return { data: data, content: content };
 };
@@ -457,30 +528,30 @@ const applySingleFieldCalculate = (content, data, smartFunction) => {
 const applyTimeChangeSmartFunction = (data, content, smartFunction) => {
   const timeField = getTimeFieldName(content);
 
-  //const { labelField, isoField, aggregationField } = content.typeSpecific.data;
+  //  const { labelField, isoField, aggregationField } = content.typeSpecific.data;
   const { amountPeriodBack, outputValue, outputFieldName, outputFormat, refValueField, outputFieldTitle } = smartFunction.parameters;
 
   if (timeField) {
-    //filter non valid times -> which shouldnt exist anyway
+    //  filter non valid times -> which shouldnt exist anyway
     data = data.filter(el => el[timeField] != null);
     let timeFieldTypeSpec = null;
-    //nothing is done yet we are operating on the rawData
-    //get UniqueDataSet - includes in visualFilters now
-    let compareFieldNames = [];
+    //  nothing is done yet we are operating on the rawData
+    //  get UniqueDataSet - includes in visualFilters now
+    const compareFieldNames = [];
     for (const fieldName of Object.keys(content.typeSpecific.fields)) {
       const currentField = content.typeSpecific.fields[fieldName];
       if (fieldName === timeField) {
         timeFieldTypeSpec = currentField;
       }
-      //needed for uniqueness part
+      //  needed for uniqueness part
       if (fieldName !== timeField && currentField.selectedValues.length > 0 && currentField.isNeededForUniqueness) {
         compareFieldNames.push(currentField.fieldName);
       }
     }
     const inputFormat = timeFieldTypeSpec.format.date.inputFormat;
-    //console.log('creating new column: ', outputFieldName, 'timeField: ', timeFieldTypeSpec);
-    //create new column for time changes add it to typespecific
-    //compareFields after is needed for uniqueness
+    //  console.log('creating new column: ', outputFieldName, 'timeField: ', timeFieldTypeSpec);
+    //  create new column for time changes add it to typespecific
+    //  compareFields after is needed for uniqueness
     for (const dimension of content.typeSpecific.dimensions) {
       const field = content.typeSpecific.fields[dimension.fieldName];
       if (dimension.fieldName !== timeField && dimension.usedForUniqueness && field.dataType !== 'number') {
@@ -500,25 +571,22 @@ const applyTimeChangeSmartFunction = (data, content, smartFunction) => {
     }
     for (const inVisualFilter of content.typeSpecific.inVisualFilter) {
       if (inVisualFilter.type === 'valueSelector' && inVisualFilter.fieldName !== timeField) {
-        //console.log('CALLING SMART FUNCTIONS', content.typeSpecific, smartFunction);
+        //  console.log('CALLING SMART FUNCTIONS', content.typeSpecific, smartFunction);
         if (!compareFieldNames.includes(inVisualFilter.fieldName)) {
           compareFieldNames.push(inVisualFilter.fieldName);
         }
       }
     }
-    //get unqiue time values to calculate what 1 step is
-    let uniqueTimeValues = data
-      .map(element => element[timeField])
-      .filter(el => el != null)
-      .filter((obj, idx, nodes) => nodes.indexOf(obj) === idx);
+    //  get unqiue time values to calculate what 1 step is
+    let uniqueTimeValues = unique(data.map(element => element[timeField]).filter(el => el != null));
     if (uniqueTimeValues.length > 1) {
       uniqueTimeValues = orderBy(uniqueTimeValues.map(obj => objToMoment(obj, inputFormat)), [], 'asc');
-      //make this back to string
+      //  make this back to string
       uniqueTimeValues = uniqueTimeValues.map(el => {
         return momentToStr(el, inputFormat);
       });
-      //console.log("unique Time Values: ",uniqueTimeValues)
-      //hash map has fast access
+      //  console.log("unique Time Values: ",uniqueTimeValues)
+      //  hash map has fast access
       const tempSearchMap = {};
       for (const row of data) {
         let key = '';
@@ -528,11 +596,11 @@ const applyTimeChangeSmartFunction = (data, content, smartFunction) => {
         key += row[timeField];
         tempSearchMap[key] = row;
       }
-      //console.log("searchMap: ",tempSearchMap);
+      //  console.log("searchMap: ",tempSearchMap);
       for (const row of data) {
         const currentVal = row[refValueField.fieldName];
         const searchTimeIndex = uniqueTimeValues.indexOf(row[timeField]) - amountPeriodBack;
-        //console.log("row: ",row,searchTimeIndex);
+        //  console.log("row: ",row,searchTimeIndex);
         if (searchTimeIndex >= 0) {
           const searchTimeVal = uniqueTimeValues[searchTimeIndex];
           let key = '';
@@ -543,14 +611,14 @@ const applyTimeChangeSmartFunction = (data, content, smartFunction) => {
           const refRow = tempSearchMap[key];
           if (refRow) {
             if (outputValue === 'percent') {
-              //no more na or infinity parts
+              //  no more na or infinity parts
               if (refRow[refValueField.fieldName] == 0 || currentVal == 0 || refRow[refValueField.fieldName] == null || currentVal == null) {
                 row[outputFieldName] = null;
               } else {
                 row[outputFieldName] = (currentVal / refRow[refValueField.fieldName] - 1) * 100;
               }
             } else {
-              //what if one of the values doesnt exist at all?
+              //  what if one of the values doesnt exist at all?
               if (refRow[refValueField.fieldName] == null || currentVal == null) {
                 row[outputFieldName] = null;
               } else {
@@ -561,15 +629,15 @@ const applyTimeChangeSmartFunction = (data, content, smartFunction) => {
             row[outputFieldName] = null;
           }
         } else {
-          //out of scope
+          //  out of scope
           row[outputFieldName] = null;
         }
       }
-      //typeSpecific changes
-      //set new FieldValues
-      //console.log('Fields before setting new field: ', content.typeSpecific.fields);
+      //  typeSpecific changes
+      //  set new FieldValues
+      //  console.log('Fields before setting new field: ', content.typeSpecific.fields);
       const newValueFormat = cloneObject(outputFormat);
-      //check if content already has our outputFieldName
+      //  check if content already has our outputFieldName
       if (content.typeSpecific.fields[outputFieldName]) {
         // console.log('Create New Value Field: ');
         content = createNewValueFieldFromExisting(content, refValueField.fieldName, outputFieldName, outputFieldTitle, newValueFormat);
@@ -577,19 +645,19 @@ const applyTimeChangeSmartFunction = (data, content, smartFunction) => {
         // console.log('Set New Value Field: ');
         content = setNewValueField(content, refValueField.fieldName, outputFieldName, outputFieldTitle, newValueFormat);
       }
-      //console.log(data);
+      //  console.log(data);
     }
   }
   return { data: data, content: content };
 };
 
 const applySelectStepsSmartFunction = (data, content, smartFunction) => {
-  //works without change for axis parts
-  //console.log("INPUT DATA LENGTH: ",data.length);
-  //console.log("SmartFilter: ",smartFilter);
+  //  works without change for axis parts
+  //  console.log("INPUT DATA LENGTH: ",data.length);
+  //  console.log("SmartFilter: ",smartFilter);
   const { field } = smartFunction.parameters;
   const stepSize = parseInt(smartFunction.parameters.stepSize);
-  let uniqueTimeValues = data.map(element => element[field.fieldName]).filter((obj, idx, nodes) => nodes.indexOf(obj) === idx);
+  let uniqueTimeValues = unique(data.map(element => element[field.fieldName]));
   const { inputFormat } = field.format.date;
   uniqueTimeValues = uniqueTimeValues.map(el => {
     return {
@@ -597,18 +665,18 @@ const applySelectStepsSmartFunction = (data, content, smartFunction) => {
       moment: objToMoment(el, inputFormat)
     };
   });
-  //sort descending
+  //  sort descending
   uniqueTimeValues.sort((left, right) => right.moment - left.moment);
-  //console.log("Unique Time Values sorted Descending: ",uniqueTimeValues);
-  //sort
+  //  console.log("Unique Time Values sorted Descending: ",uniqueTimeValues);
+  //  sort
   const selectedTimes = [];
   for (let i = 0; i < uniqueTimeValues.length; i = i + stepSize) {
-    //console.log("getting: ",i)
+    //  console.log("getting: ",i)
     selectedTimes.push(uniqueTimeValues[i].label);
   }
-  //select this fun in the data
+  //  select this fun in the data
   data = data.filter(el => selectedTimes.includes(el[field.fieldName]));
-  //content.typeSpecific.fields[field.fieldName].selectedValues = cloneObject(selectedTimes);
+  //  content.typeSpecific.fields[field.fieldName].selectedValues = cloneObject(selectedTimes);
   return { data: data, content: content };
 };
 
@@ -628,10 +696,10 @@ const applySmartFilter = (data, content) => {
     return data;
   }
   for (const smartFilter of content.typeSpecific.smartFilters) {
-    //implementing smart Filter parts
+    //  implementing smart Filter parts
     switch (smartFilter.name) {
       case 'enableTop': {
-        //for most charts top means the axis where a value field is used
+        //  for most charts top means the axis where a value field is used
         data = applyTopBottomFilter(data, content, smartFilter, 'desc');
         break;
       }
@@ -640,7 +708,7 @@ const applySmartFilter = (data, content) => {
         break;
       }
       case 'geographicalPreference': {
-        //done for axis
+        //  done for axis
         data = applyGeoFilter(data, content, smartFilter);
         break;
       }
@@ -653,7 +721,7 @@ const applySmartFilter = (data, content) => {
         console.error('smartFilter Error no implementation for: ', smartFilter, data, content);
     }
   }
-  //console.log("Smart FILTER BEFORE RETURN: ",items);
+  //  console.log("Smart FILTER BEFORE RETURN: ",items);
   return data;
 };
 
@@ -667,11 +735,8 @@ const applyselectTimeLatestFilter = (data, content, smartFilter) => {
   if (timeField) {
     const inputFormat = content.typeSpecific.fields[timeField].format.date.inputFormat;
     const latest = parseInt(smartFilter.parameters.latest);
-    //get unique time Values and Sort Them
-    let uniqueTimeValues = data
-      .map(element => element[timeField])
-      .filter(el => el != null)
-      .filter((obj, idx, nodes) => nodes.indexOf(obj) === idx);
+    //  get unique time Values and Sort Them
+    let uniqueTimeValues = unique(data.map(element => element[timeField]).filter(el => el != null));
     if (uniqueTimeValues.length > 1) {
       uniqueTimeValues = orderBy(
         uniqueTimeValues.map(obj => {
@@ -680,10 +745,10 @@ const applyselectTimeLatestFilter = (data, content, smartFilter) => {
         [],
         'desc'
       );
-      //make this back to string
+      //  make this back to string
       uniqueTimeValues = uniqueTimeValues.map(el => momentToStr(el, inputFormat));
       // console.log('APPLYING LATEST FILTER: ', uniqueTimeValues);
-      //select from data only the amount of latest
+      //  select from data only the amount of latest
       uniqueTimeValues = uniqueTimeValues.slice(0, latest);
       // console.log('APPLYING LATEST FILTER: AFTER SLICE ', uniqueTimeValues);
       data = data.filter(el => uniqueTimeValues.includes(el[timeField]));
@@ -703,7 +768,7 @@ const applyselectTimeLatestFilter = (data, content, smartFilter) => {
  */
 const applyGeoFilter = (data, content, smartFilter) => {
   const isoField = getIsoFieldName(content);
-  //go through fields in typespec fields and check for iso
+  //  go through fields in typespec fields and check for iso
   if (isoField) {
     let additionItems = [];
     if (MapTypes.includes(content.type)) {
@@ -736,17 +801,17 @@ const applyGeoFilter = (data, content, smartFilter) => {
  * @return                     [description]
  */
 const applyTopBottomFilter = (data, content, smartFilter, direction = 'desc') => {
-  //console.log('Applying Top/Bottom Filter', data, content, smartFilter);
-  //if we apply each In visual filter once
-  //we can calculate for each combination of in visual filters
-  //the top part -> very expensive
+  //  console.log('Applying Top/Bottom Filter', data, content, smartFilter);
+  //  if we apply each In visual filter once
+  //  we can calculate for each combination of in visual filters
+  //  the top part -> very expensive
 
-  //if it is static it calculates the tops one time
-  //and then only selects the top of
+  //  if it is static it calculates the tops one time
+  //  and then only selects the top of
   const labelField = getLabelFieldName(content);
   const valueField = getValueFieldName(content);
   const isoField = getIsoFieldName(content);
-  //static or dynamic calculation?
+  //  static or dynamic calculation?
   const amount = smartFilter.parameters.topValue || smartFilter.parameters.bottomValue;
 
   let additionItems = [];
@@ -754,11 +819,11 @@ const applyTopBottomFilter = (data, content, smartFilter, direction = 'desc') =>
     additionItems = data.filter(obj => obj[isoField] == null);
     data = data.filter(obj => obj[isoField] != null);
   }
-  //lets take a different approach then before lets get the unique parts and sort for
-  //when do we have to separately calc tops-
+  //  lets take a different approach then before lets get the unique parts and sort for
+  //  when do we have to separately calc tops-
   // - indivudual filters single select
   // - axis that are not x and y axis?
-  let bucketFieldNames = [];
+  const bucketFieldNames = [];
   for (const inVisualFilter of content.typeSpecific.inVisualFilter) {
     if (inVisualFilter.type === 'valueSelector') {
       if (!bucketFieldNames.includes(inVisualFilter.fieldName)) {
@@ -766,24 +831,24 @@ const applyTopBottomFilter = (data, content, smartFilter, direction = 'desc') =>
       }
     }
   }
-  //we have to calc for each bucket at least . but maybe there is more
+  //  we have to calc for each bucket at least . but maybe there is more
   // for a linechart TOP2 dynamic is
   // for each invisualFilter valueSelector
   // for each xAxisValue -> the top 2 labels of Y Axis
   if (content.typeSpecific.dimensions.length > 2) {
     for (const dimension of content.typeSpecific.dimensions) {
       if (dimension.usedForUniqueness && dimension.dimName !== 'iso') {
-        //we have to make a type switch here since group and stacked
-        //have different axis then the rest.. buuh
+        //  we have to make a type switch here since group and stacked
+        //  have different axis then the rest.. buuh
         if (['groupedbarchart', 'stackedbarchart', 'bar-grouped-horizontal', 'bar-stacked-horizontal'].includes(content.type)) {
-          //in grouped and stacked we want per group Axis the things
+          //  in grouped and stacked we want per group Axis the things
           if (dimension.dimName == 'groupAxis') {
             if (!bucketFieldNames.includes(dimension.fieldName)) {
               bucketFieldNames.push(dimension.fieldName);
             }
           }
         } else {
-          //this are time charts and we want per year aka xAxis value the tops
+          //  this are time charts and we want per year aka xAxis value the tops
           if (dimension.dimName == 'xAxis') {
             if (!bucketFieldNames.includes(dimension.fieldName)) {
               bucketFieldNames.push(dimension.fieldName);
@@ -803,17 +868,17 @@ const applyTopBottomFilter = (data, content, smartFilter, direction = 'desc') =>
     // -> [2018]['gamma'] ---> top
     // -->  get the  labels
     if (bucketFieldNames.length > 0) {
-      //console.log('[DataPipeline] - Top Static - ', content, bucketFieldNames, mode);
-      let bucketSelector = {};
-      //for greatest or lowerst sorted depending on type calc bucket with one value fixed
+      //  console.log('[DataPipeline] - Top Static - ', content, bucketFieldNames, mode);
+      const bucketSelector = {};
+      //  for greatest or lowerst sorted depending on type calc bucket with one value fixed
       for (const fieldName of bucketFieldNames) {
         let uniqueValues = unique(data.map(el => el[fieldName]));
         if (content.typeSpecific.fields[fieldName].dataType === 'date') {
           const { format } = content.typeSpecific.fields[fieldName];
-          //sort desc
+          //  sort desc
           uniqueValues = orderBy(uniqueValues.map(obj => objToMoment(obj, format.date.inputFormat)), [], sortMode);
           // console.log('DATE VALUE ORDER: ', uniqueValues);
-          //take first
+          //  take first
           const lastVal = momentToStr(uniqueValues[0], format.date.inputFormat);
           bucketSelector[fieldName] = lastVal;
         } else {
@@ -824,7 +889,7 @@ const applyTopBottomFilter = (data, content, smartFilter, direction = 'desc') =>
         }
       }
       // console.log('BUCKET SELECTOR', bucketSelector);
-      //get the right bucket
+      //  get the right bucket
       const selectedLabels = unique(
         orderBy(
           data.filter(el => {
@@ -839,11 +904,11 @@ const applyTopBottomFilter = (data, content, smartFilter, direction = 'desc') =>
           .slice(0, amount)
           .map(el => el[labelField])
       );
-      //get all the data
+      //  get all the data
       data = data.filter(el => selectedLabels.includes(el[labelField]));
     } else {
-      //console.log('[DataPipeline] - Top Static - without Buckets', valueField);
-      //well seems we just need top
+      //  console.log('[DataPipeline] - Top Static - without Buckets', valueField);
+      //  well seems we just need top
       data = data.filter(el => el[valueField] != null);
       data = orderBy(data, valueField, direction).slice(0, amount);
     }
@@ -853,7 +918,7 @@ const applyTopBottomFilter = (data, content, smartFilter, direction = 'desc') =>
        */
 
     if (bucketFieldNames.length > 0) {
-      //console.log('[DataPipeline] - Top Dynamic - ', content, bucketFieldNames);
+      //  console.log('[DataPipeline] - Top Dynamic - ', content, bucketFieldNames);
       const mapVals = {};
       data = data.filter(el => el[valueField] != null);
       for (const row of data) {
@@ -873,8 +938,8 @@ const applyTopBottomFilter = (data, content, smartFilter, direction = 'desc') =>
       }
       data = tempData;
     } else {
-      //console.log('[DataPipeline] - Top Dynamic - without Buckets', valueField);
-      //well seems we just need top
+      //  console.log('[DataPipeline] - Top Dynamic - without Buckets', valueField);
+      //  well seems we just need top
       data = data.filter(el => el[valueField] != null);
       data = orderBy(data, valueField, direction).slice(0, amount);
     }
@@ -897,5 +962,7 @@ export {
   getIsoFieldName,
   getValueFieldName,
   getOldFields,
-  getLabelFieldName
+  getLabelFieldName,
+  getRightLegendFieldName,
+  getRightLabelFieldName
 };

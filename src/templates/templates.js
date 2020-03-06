@@ -344,8 +344,22 @@ const SECTIONS = [
                 disabledReason: ''
               },
               {
+                id: 'maplegendextendedbodystyle',
+                label: 'Extended Body Style', //used for showing
+                selected: true, // currently selected
+                enabled: true, //
+                disabledReason: ''
+              },
+              {
                 id: 'maplegendheaderstyle',
                 label: 'Header Style', //used for showing
+                selected: true, // currently selected
+                enabled: true, //
+                disabledReason: ''
+              },
+              {
+                id: 'maplegendextendedheaderstyle',
+                label: 'Extended Header Style', //used for showing
                 selected: true, // currently selected
                 enabled: true, //
                 disabledReason: ''
@@ -426,6 +440,13 @@ const SECTIONS = [
             disabledReason: ''
           },
           {
+            id: 'chartlegendfontscale',
+            label: 'Legend Fontscale', //used for showing
+            selected: true, // currently selected
+            enabled: true, //
+            disabledReason: ''
+          },
+          {
             id: 'chartlegendposition',
             label: 'Legend Alignment', //used for showing
             selected: true, // currently selected
@@ -498,6 +519,13 @@ const SECTIONS = [
                 disabledReason: ''
               },
               {
+                id: 'chartlabelaxisplacement',
+                label: 'Placement', //used for showing
+                selected: true, // currently selected
+                enabled: true, //
+                disabledReason: ''
+              },
+              {
                 id: 'chartlabelaxisenabled',
                 label: 'Enabled', //used for showing
                 selected: true, // currently selected
@@ -524,6 +552,13 @@ const SECTIONS = [
               {
                 id: 'chartvalueaxisvaluestyle',
                 label: 'Value Style', //used for showing
+                selected: true, // currently selected
+                enabled: true, //
+                disabledReason: ''
+              },
+              {
+                id: 'chartvalueaxisplacement',
+                label: 'Placement', //used for showing
                 selected: true, // currently selected
                 enabled: true, //
                 disabledReason: ''
@@ -1165,6 +1200,9 @@ const applyValueToContent = (content, template, valueId) => {
     case 'chartlegendscrollheight':
       content.typeSpecific.chart.legend.scrollHeight = JSON.parse(JSON.stringify(templateValue.value));
       break;
+    case 'chartlegendfontscale':
+      content.typeSpecific.chart.legend.fontScale = JSON.parse(JSON.stringify(templateValue.value));
+      break;
     case 'reportactivechapterwidth':
       content.typeSpecific.report.activeChapterWidth = JSON.parse(JSON.stringify(templateValue.value));
       break;
@@ -1294,13 +1332,32 @@ const applyValueToContent = (content, template, valueId) => {
     case 'maplegendbodystyle':
       content.typeSpecific.map.legend.valueStyle = JSON.parse(JSON.stringify(templateValue.value));
       break;
+    case 'maplegendextendedbodystyle':
+      const valueextendedbody = JSON.parse(JSON.stringify(templateValue.value));
+      content.typeSpecific.map.legend.values.borderRadius = valueextendedbody.borderRadius;
+      content.typeSpecific.map.legend.values.background = valueextendedbody.background;
+      content.typeSpecific.map.legend.values.shadow = valueextendedbody.shadow;
+      content.typeSpecific.map.legend.colorBoxes = valueextendedbody.colorBoxes;
+      break;
+    case 'maplegendextendedheaderstyle':
+      const valueextendedheader = JSON.parse(JSON.stringify(templateValue.value));
+      content.typeSpecific.map.legend.title.borderRadius = valueextendedheader.borderRadius;
+      content.typeSpecific.map.legend.title.background = valueextendedheader.background;
+      content.typeSpecific.map.legend.title.shadow = valueextendedheader.shadow;
+      break;
     case 'maplegendheaderstyle':
       content.typeSpecific.map.legend.titleStyle = JSON.parse(JSON.stringify(templateValue.value));
       break;
     case 'maplegendtype':
       //check if we can do this;
       //console.log('[MaplegendType ] - APPLY VALUE');
-      if (content && content.typeSpecific && content.typeSpecific.style && content.typeSpecific.style.colors2 && content.typeSpecific.style.colors2.continuous) {
+      if (
+        content &&
+        content.typeSpecific &&
+        content.typeSpecific.style &&
+        content.typeSpecific.style.colors2 &&
+        content.typeSpecific.style.colors2.continuous
+      ) {
         const colors = content.typeSpecific.style.colors2;
         const cando = (colors.type === 'continuous' && colors.continuous.scaleType !== 'quantiles') || colors.type === 'gradient';
         //console.log('[MaplegendType ] - ALLOW CHANGE ', cando);
@@ -1333,11 +1390,17 @@ const applyValueToContent = (content, template, valueId) => {
     case 'chartlabelaxisvaluestyle':
       content.typeSpecific.chart.axis.labelAxis.valueStyle = JSON.parse(JSON.stringify(templateValue.value));
       break;
+    case 'chartlabelaxisplacement':
+      content.typeSpecific.chart.axis.labelAxis = Object.assign(content.typeSpecific.chart.axis.labelAxis, JSON.parse(JSON.stringify(templateValue.value)));
+      break;
     case 'chartvalueaxistitlestyle':
       content.typeSpecific.chart.axis.valueAxis.titleStyle = JSON.parse(JSON.stringify(templateValue.value));
       break;
     case 'chartvalueaxisvaluestyle':
       content.typeSpecific.chart.axis.valueAxis.valueStyle = JSON.parse(JSON.stringify(templateValue.value));
+      break;
+    case 'chartvalueaxisplacement':
+      content.typeSpecific.chart.axis.valueAxis = Object.assign(content.typeSpecific.chart.axis.valueAxis, JSON.parse(JSON.stringify(templateValue.value)));
       break;
     case 'chartvaluesenabled':
       content.typeSpecific.chart.values.enabled = JSON.parse(JSON.stringify(templateValue.value));
@@ -1387,7 +1450,6 @@ const applyValueToContent = (content, template, valueId) => {
     case 'reportpublishsettingsupdatenotification':
       content.typeSpecific.updateOptions.updateNotification = JSON.parse(JSON.stringify(templateValue.value));
       break;
-
     case 'publishsettingsautoupdate':
       content.typeSpecific.updateOptions.autoUpdateVisual = JSON.parse(JSON.stringify(templateValue.value));
       break;
@@ -1438,8 +1500,10 @@ const applyValueToContent = (content, template, valueId) => {
       if (colors2.type === 'categorical') {
         for (let i = 0; i < colors2.categorical.values.length; i++) {
           const curColor = colors2.categorical.values[i];
-          if (i < valueObj.colors.length) {
-            curColor.color = valueObj.colors[i];
+          if (i + 1 < valueObj.colors.length) {
+            curColor.color = valueObj.colors[i + 1];
+          } else {
+            curColor.color = valueObj.colors[valueObj.colors.length - 1];
           }
         }
         if (valueObj.fallbackColor) {
@@ -1453,13 +1517,17 @@ const applyValueToContent = (content, template, valueId) => {
           const curColor = colors2.gradient.values[i];
           if (i < valueObj.colors.length) {
             curColor.color = valueObj.colors[i];
+          } else {
+            curColor.color = valueObj.colors[valueObj.colors.length - 1];
           }
         }
       }
       if (colors2.type === 'range') {
         for (let i = 0; i < colors2.range.colors.length; i++) {
-          if (i < valueObj.colors.length) {
-            colors2.range.colors[i] = valueObj.colors[i];
+          if (i + 1 < valueObj.colors.length) {
+            colors2.range.colors[i] = valueObj.colors[i + 1];
+          } else {
+            colors2.range.colors[i] = valueObj.colors[valueObj.colors.length - 1];
           }
         }
         if (valueObj.fallbackColor) {
@@ -1472,6 +1540,8 @@ const applyValueToContent = (content, template, valueId) => {
         for (let i = 0; i < colors2.continuous.colors.length; i++) {
           if (i < valueObj.colors.length) {
             colors2.continuous.colors[i] = valueObj.colors[i];
+          } else {
+            colors2.continuous.colors[i] = valueObj.colors[valueObj.colors.length - 1];
           }
         }
       }
@@ -1722,6 +1792,12 @@ const generateValueFromContent = (content, template, valueId) => {
       template.templateValues[valueId] = {
         id: valueId,
         value: JSON.parse(JSON.stringify(content.typeSpecific.chart.legend.scrollHeight))
+      };
+      break;
+    case 'chartlegendfontscale':
+      template.templateValues[valueId] = {
+        id: valueId,
+        value: JSON.parse(JSON.stringify(content.typeSpecific.chart.legend.fontScale))
       };
       break;
     case 'reportactivechapterwidth':
@@ -1984,6 +2060,27 @@ const generateValueFromContent = (content, template, valueId) => {
         value: JSON.parse(JSON.stringify(content.typeSpecific.map.legend.valueStyle))
       };
       break;
+    case 'maplegendextendedbodystyle':
+      const valueextendedbod = {};
+      valueextendedbod['borderRadius'] = JSON.parse(JSON.stringify(content.typeSpecific.map.legend.values.borderRadius));
+      valueextendedbod['background'] = JSON.parse(JSON.stringify(content.typeSpecific.map.legend.values.background));
+      valueextendedbod['shadow'] = JSON.parse(JSON.stringify(content.typeSpecific.map.legend.values.shadow));
+      valueextendedbod['colorBoxes'] = JSON.parse(JSON.stringify(content.typeSpecific.map.legend.colorBoxes));
+      template.templateValues[valueId] = {
+        id: valueId,
+        value: valueextendedbod
+      };
+      break;
+    case 'maplegendextendedheaderstyle':
+      const valueextendedheader = {};
+      valueextendedheader['borderRadius'] = JSON.parse(JSON.stringify(content.typeSpecific.map.legend.title.borderRadius));
+      valueextendedheader['background'] = JSON.parse(JSON.stringify(content.typeSpecific.map.legend.title.background));
+      valueextendedheader['shadow'] = JSON.parse(JSON.stringify(content.typeSpecific.map.legend.title.shadow));
+      template.templateValues[valueId] = {
+        id: valueId,
+        value: valueextendedheader
+      };
+      break;
     case 'maplegendheaderstyle':
       template.templateValues[valueId] = {
         id: valueId,
@@ -2044,7 +2141,19 @@ const generateValueFromContent = (content, template, valueId) => {
         value: JSON.parse(JSON.stringify(content.typeSpecific.chart.axis.labelAxis.valueStyle))
       };
       break;
-
+    case 'chartlabelaxisplacement':
+      const labelAxis = JSON.parse(JSON.stringify(content.typeSpecific.chart.axis.labelAxis));
+      template.templateValues[valueId] = {
+        id: valueId,
+        value: {
+          autoLines: labelAxis.autoLines,
+          maxLines: labelAxis.maxLines,
+          autoRotation: labelAxis.autoRotation,
+          minRotation: labelAxis.minRotation,
+          placementMode: labelAxis.placementMode
+        }
+      };
+      break;
     case 'chartvalueaxistitlestyle':
       template.templateValues[valueId] = {
         id: valueId,
@@ -2055,6 +2164,19 @@ const generateValueFromContent = (content, template, valueId) => {
       template.templateValues[valueId] = {
         id: valueId,
         value: JSON.parse(JSON.stringify(content.typeSpecific.chart.axis.valueAxis.valueStyle))
+      };
+      break;
+    case 'chartvalueaxisplacement':
+      const valueAxis = JSON.parse(JSON.stringify(content.typeSpecific.chart.axis.valueAxis));
+      template.templateValues[valueId] = {
+        id: valueId,
+        value: {
+          autoLines: valueAxis.autoLines,
+          maxLines: valueAxis.maxLines,
+          autoRotation: valueAxis.autoRotation,
+          minRotation: valueAxis.minRotation,
+          placementMode: valueAxis.placementMode
+        }
       };
       break;
     case 'chartvaluestyle':
@@ -2244,6 +2366,7 @@ const generateValueFromContent = (content, template, valueId) => {
       console.log('[Template] - ERROR MISSING IMPLEMENTATION FOR VALUE GENERATION : ' + valueId);
       break;
   }
+
   return template;
 };
 
@@ -2265,6 +2388,7 @@ export const getAmountofSelectedTemplateValues = (template, templateConfiguratio
   for (const section of templateConfiguration) {
     getSelectedTemplateValueIdsForSectionandChildren(section, selectedTemplateValueIds);
   }
+
   return selectedTemplateValueIds.length;
 };
 
@@ -2280,11 +2404,13 @@ export const reduceTemplateValuesToSelected = (template, templateConfiguration) 
   for (const section of templateConfiguration) {
     getSelectedTemplateValueIdsForSectionandChildren(section, selectedTemplateValueIds);
   }
+
   const newTemplate = JSON.parse(JSON.stringify(template));
   newTemplate.templateValues = {};
   for (const valueId of selectedTemplateValueIds) {
     newTemplate.templateValues[valueId] = template.templateValues[valueId];
   }
+
   return newTemplate;
 };
 
@@ -2297,12 +2423,14 @@ export const applyTemplateToContent = (content, template, templateConfiguration)
   for (const section of templateConfiguration) {
     getSelectedTemplateValueIdsForSectionandChildren(section, selectedTemplateValueIds);
   }
+
   if (selectedTemplateValueIds.length > 0) {
     for (const templateValueId of selectedTemplateValueIds) {
       //console.log('[Templates] - applying Value: ' + templateValueId);
       applyValueToContent(content, template, templateValueId);
     }
   }
+
   return content;
 };
 
@@ -2313,25 +2441,30 @@ const getSelectedTemplateValueIdsForSectionandChildren = (section, currentSelect
         currentSelected.push(value.id);
       }
     }
+
     for (const subsection of section.sections) {
       getSelectedTemplateValueIdsForSectionandChildren(subsection, currentSelected);
     }
   }
+
   return currentSelected;
 };
 
 export const applySectionSelectionForChildren = (section, selected) => {
   if (section.enabled) {
     section.selected = selected;
+
     for (const value of section.templateValues) {
       if (value.enabled) {
         value.selected = section.selected;
       }
     }
+
     for (const subsection of section.sections) {
       applySectionSelectionForChildren(subsection, selected);
     }
   }
+
   return section;
 };
 
@@ -2348,14 +2481,17 @@ const enabledisableSectionAndSubsections = (section, disabledReason, enabled) =>
   section.selected = enabled;
   section.displayOpened = false;
   section.disabledReason = disabledReason;
+
   for (const value of section.templateValues) {
     value.enabled = enabled;
     value.selected = enabled;
     value.disabledReason = disabledReason;
   }
+
   for (const subSection of section.sections) {
     enabledisableSectionAndSubsections(subSection, disabledReason, enabled);
   }
+
   return section;
 };
 
@@ -2368,6 +2504,7 @@ const checkSectionAndSubsectionsForValueExistsinTemplate = (section, template, d
         value.disabledReason = disabledReason;
       }
     }
+
     //test subsections
     for (const subSection of section.sections) {
       checkSectionAndSubsectionsForValueExistsinTemplate(subSection, template, disabledReason);
@@ -2382,7 +2519,7 @@ const checkSectionAndSubsectionsForValueExistsinTemplate = (section, template, d
  */
 export const generateNewTemplateAndConfigurationFromContent = content => {
   const newTemplate = {
-    version: 7,
+    version: 8,
     label: 'New template',
     description: 'Describe your template',
     created_at: new Date(),
@@ -2390,6 +2527,7 @@ export const generateNewTemplateAndConfigurationFromContent = content => {
     id: uuid(),
     templateValues: {}
   };
+
   const newTemplateConfiguration = JSON.parse(JSON.stringify(SECTIONS));
   //which sections are enabled for the content type?
   setSectionsDisabledDependingOnContenType(content, newTemplateConfiguration);
@@ -2398,6 +2536,7 @@ export const generateNewTemplateAndConfigurationFromContent = content => {
   for (const section of newTemplateConfiguration) {
     getSelectedTemplateValueIdsForSectionandChildren(section, selectedTemplateValueIds);
   }
+
   //try generate values of the content and ids that are selected
   if (selectedTemplateValueIds.length > 0) {
     for (const valueId of selectedTemplateValueIds) {
@@ -2406,6 +2545,7 @@ export const generateNewTemplateAndConfigurationFromContent = content => {
   }
   return { template: newTemplate, templateConfiguration: newTemplateConfiguration };
 };
+
 const setSectionsDisabledDependingOnContenType = (content, templateConfiguration) => {
   if (ParentTypes.includes(content.type)) {
     for (const section of templateConfiguration) {
