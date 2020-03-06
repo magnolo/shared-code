@@ -1,0 +1,8 @@
+FROM spacegregor/node-dockerize:12
+
+# Copy Node packages
+COPY package.json ${APP_PATH}
+COPY yarn.lock ${APP_PATH}
+
+# Install node packages
+RUN yarn --pure-lockfile --ignore-engines --unsafe-perm=true --allow-root
